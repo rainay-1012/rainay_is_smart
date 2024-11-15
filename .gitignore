@@ -321,3 +321,5 @@ dist
 
 **/*Zone.Identifier
 *.Zone.Identifier
+
+**/*service-account-key.json
