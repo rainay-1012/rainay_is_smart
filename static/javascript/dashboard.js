@@ -1,8 +1,3 @@
-// import "datatables";
-// import "datatables-bootstrap";
-// import * as echarts from "echarts";
-// import $ from "jquery";
-
 let progress = document.getElementById("step-progress");
 let steps = document.querySelectorAll(".step");
 let stepContainers = document.querySelectorAll(".step-container");

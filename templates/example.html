@@ -51,6 +51,60 @@
       href="../static/style/dashboard.css"
     />
   </head>
+
+  <style>
+    /* Style for the profile pop-out box */
+    .profile-popout {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      width: 200px;
+      background-color: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 10px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .profile-popout::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      right: 15px;
+      border-width: 10px;
+      border-style: solid;
+      border-color: transparent transparent white transparent;
+    }
+
+    .profile-popout h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .profile-popout p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .profile-popout button {
+      width: 100%;
+      padding: 8px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .profile-popout button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+
   <body
     id="body-pd"
     class="bg-light"
@@ -82,12 +136,10 @@
         >
           <i class="bx bxs-message-dots"></i>
         </button>
-        <a
-          href="#"
-          class="text-dark ms-2 position-relative"
-        >
-          <div
-            class="profile-icon"
+        <div class="text-dark ms-2 position-relative dropdown">
+          <button
+            type="button"
+            class="profile-icon border-0"
             style="
               width: 40px;
               height: 40px;
@@ -97,8 +149,33 @@
               background-position: center;
               cursor: pointer;
             "
-          ></div>
-        </a>
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+          ></button>
+          <div class="dropdown-menu mt-2 p-3">
+            <div class="h6">User Details</div>
+            <p class="small"><strong>User ID:</strong> 12345</p>
+            <p class="small"><strong>Username:</strong> johndoe</p>
+            <p class="small"><strong>Position:</strong> Developer</p>
+            <button
+              id="signoutButton"
+              class="btn btn-primary"
+            >
+              SignOut
+            </button>
+          </div>
+        </div>
+        <!-- Profile Pop-out Box -->
+        <div
+          class="profile-popout"
+          id="profilePopout"
+        >
+          <h4>User Details</h4>
+          <p><strong>User ID:</strong> 12345</p>
+          <p><strong>Username:</strong> johndoe</p>
+          <p><strong>Position:</strong> Developer</p>
+          <button onclick="redirectToSignOut()">SignOut</button>
+        </div>
       </div>
     </header>
     <div
@@ -322,4 +399,5 @@
   <!-- Custom Javascript -->
   <script src="../static/javascript/sidebar.js"></script>
   <script src="../static/javascript/main.js"></script>
+  <script src="../static/javascript/popout.js"></script>
 </html>

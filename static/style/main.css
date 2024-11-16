@@ -31,12 +31,12 @@ body {
   display: block;
 }
 
-.main-container {
+#main-container {
   height: calc(100vh - var(--header-height));
 }
 
 @media screen and (min-width: 768px) {
-  .main-container {
+  #main-container {
     height: calc(100vh - var(--header-height) - 1rem);
   }
 }
