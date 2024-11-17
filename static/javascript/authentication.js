@@ -1,5 +1,5 @@
 import { initializeApp } from "../vendor/firebase/firebase-app";
-import { getAuth, signInWithCustomToken } from "../vendor/firebase/firebase-auth";
+import { getAuth, signInWithEmailAndPassword } from "../vendor/firebase/firebase-auth";
 
 const firebaseConfig = {
 };
@@ -24,25 +24,28 @@ export const signup = async ({email, password}) => {
     return await response.json();
 };
 
-export const requestLoginRedirect = async ({email, password}) => {
-    const response = await fetch("http://localhost:5000/login",{
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-    })
+export const login = async ({email, password}) => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
 
-    if (!response.ok) {
-        throw new Error(`Login failed: ${response.statusText}`);
-    }
+        const response = await fetch("http://localhost:5001/login",{
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email})
+        });
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(`${errorCode} : ${errorMessage}`);
+      });
+
+
+    // if (!response.ok) {
+    //     throw new Error(`Login failed: ${response.statusText}`);
+    // }
 }
-
-export const loginWithToken = async (token) => {
-    signInWithCustomToken(auth, token)
-    .then((crendential) => {
-        console.log(`User with email ${crendential.user.email} has been successfully login`);
-    }).catch((error) => {
-        console.error(`${error.code} : ${error.message}`);
-    })
-};

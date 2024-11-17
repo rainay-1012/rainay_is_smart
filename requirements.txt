@@ -10,6 +10,7 @@ click==8.1.7
 cryptography==43.0.3
 firebase-admin==6.6.0
 Flask==3.1.0
+Flask-Mail==0.10.0
 Flask-SQLAlchemy==3.1.1
 google-api-core==2.23.0
 google-api-python-client==2.153.0
@@ -22,14 +23,15 @@ google-crc32c==1.6.0
 google-resumable-media==2.7.2
 googleapis-common-protos==1.66.0
 greenlet==3.1.1
-grpcio==1.67.1
-grpcio-status==1.67.1
+grpcio==1.68.0
+grpcio-status==1.68.0
 httplib2==0.22.0
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==3.0.2
 msgpack==1.1.0
+pillow==11.0.0
 proto-plus==1.25.0
 protobuf==5.28.3
 pyasn1==0.6.1
@@ -41,6 +43,7 @@ pyparsing==3.2.0
 python-dotenv==1.0.1
 requests==2.32.3
 rsa==4.9
+snowflake-id==1.0.2
 SQLAlchemy==2.0.36
 typing_extensions==4.12.2
 uritemplate==4.1.1

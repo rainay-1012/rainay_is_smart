@@ -6,8 +6,9 @@ input {
   caret-color: auto;
 }
 
-div.form-group {
-  margin-bottom: 2rem;
+div.form-group,
+.form-floating {
+  margin-bottom: 1.5rem;
 }
 
 div.invalid-feedback {
@@ -22,4 +23,8 @@ div.invalid-feedback {
 .form-check-input.is-valid ~ .form-check-label,
 .was-validated .form-check-input:valid ~ .form-check-label {
   color: inherit !important;
+}
+
+.invalid-feedback {
+  font-size: 0.7rem;
 }
