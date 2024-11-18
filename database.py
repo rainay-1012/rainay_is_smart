@@ -57,7 +57,7 @@ class Token(db.Model):
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     position: Mapped[Position] = mapped_column(Enum(Position))
     company_id: Mapped[int] = mapped_column(ForeignKey("company.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
     company: Mapped["Company"] = relationship(back_populates="tokens")
     user: Mapped["User"] = relationship(back_populates="token")
 

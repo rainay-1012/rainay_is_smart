@@ -1,0 +1,20 @@
+.table-button {
+    font-size: 0.8rem;
+    width: 4rem;
+}
+
+.dt-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    .dt-layout-table {
+        margin-bottom: auto;
+    }
+    .dt-select-checkbox {
+        accent-color: #6c757d;
+    }
+}
+
+.extra-small {
+    font-size:  0.75rem;
+}

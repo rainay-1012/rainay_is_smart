@@ -6,14 +6,14 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import auth, credentials, storage
 from firebase_admin.auth import EmailAlreadyExistsError, UserNotFoundError, UserRecord
-from flask import Flask, g, jsonify, request, redirect, url_for
+from flask import Flask, g, jsonify, redirect, request, url_for
 from flask_mail import Mail, Message
 from google.cloud.exceptions import GoogleCloudError
 from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.datastructures.file_storage import FileStorage
 
-from database import Company, Token, User, db, init_db, Position
+from database import Company, Position, Token, User, db, init_db
 
 app = Flask(__name__)
 
@@ -289,4 +289,4 @@ if __name__ == "__main__":
 
     bucket = storage.bucket()
 
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5000)
