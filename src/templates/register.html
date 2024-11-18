@@ -11,6 +11,28 @@
       name="viewport"
       content="width=device-width, initial-scale=1"
     />
+<<<<<<< HEAD:src/templates/register.html
+=======
+    <!-- Vendor Stylesheet -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./static/vendor/bootstrap/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./static/vendor/boxicons/css/boxicons.min.css"
+    />
+
+    <!-- Custom Stylesheet -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="./static/style/login.css"
+    />
+>>>>>>> 026b121d96788a1bb7431959a519d0b982bd7943:templates/register.html
   </head>
   <body
     class="w-100 h-100 d-flex justify-content-center align-items-center flex-column bg-primary-subtle"
@@ -22,7 +44,11 @@
       <div class="text-center mb-3">
         <!-- Logo here -->
         <img
+<<<<<<< HEAD:src/templates/register.html
           src="<%= require('../assets/logo only.svg') %>"
+=======
+          src="./static/assets/logo only.svg"
+>>>>>>> 026b121d96788a1bb7431959a519d0b982bd7943:templates/register.html
           height="100"
           class="mb-0"
         />
@@ -363,5 +389,39 @@
         </div>
       </div>
     </div>
+<<<<<<< HEAD:src/templates/register.html
+=======
+
+    <!-- Vendor Javascript -->
+    <script src="./static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Javascript -->
+    <script>
+      // Custom validation script to ensure passwords match
+      document
+        .querySelector("form")
+        .addEventListener("submit", function (event) {
+          const form = event.target;
+          const password = document.getElementById("password").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          if (password !== confirmPassword) {
+            document
+              .getElementById("confirmPassword")
+              .setCustomValidity("Passwords do not match.");
+            document.getElementById("confirmPassword").reportValidity();
+            event.preventDefault();
+          } else {
+            document.getElementById("confirmPassword").setCustomValidity("");
+          }
+
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            form.classList.add("was-validated");
+          }
+        });
+    </script>
+>>>>>>> 026b121d96788a1bb7431959a519d0b982bd7943:templates/register.html
   </body>
 </html>
