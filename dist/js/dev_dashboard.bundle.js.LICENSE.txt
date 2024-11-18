@@ -51,3 +51,7 @@ PERFORMANCE OF THIS SOFTWARE.
 /*! Responsive 3.0.3
  * © SpryMedia Ltd - datatables.net/license
  */
+
+/*! Select for DataTables 2.1.0
+ * © SpryMedia Ltd - datatables.net/license/mit
+ */
