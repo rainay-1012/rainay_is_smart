@@ -1,0 +1,50 @@
+.progress-bar {
+  -webkit-transition: width 1s ease;
+  transition: width 1s ease;
+}
+
+.step {
+  --step-size: 3rem;
+  display: flex;
+  justify-self: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+  width: var(--step-size);
+  height: var(--step-size);
+  transform: translateY(calc(-1 * (var(--step-size) / 2) - 0.5rem));
+  transition: background-color 1s ease;
+  user-select: none;
+}
+
+.disabled-container * {
+  user-select: none;
+  caret-color: transparent;
+}
+
+.disabled-container::after {
+  content: "";
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bs-secondary-bg-subtle);
+  opacity: 0.5;
+}
+
+.glowing {
+  box-shadow: 0 0 5px 0.1px var(--bs-primary);
+}
+
+#chart1,
+#chart2 {
+  width: 100%;
+  height: 250px;
+}
+
+// #dropContainer:hover {
+//   background-color: grey;
+  
+// }

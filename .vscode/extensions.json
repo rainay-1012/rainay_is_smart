@@ -15,7 +15,6 @@
         "ms-vsliveshare.vsliveshare",
         "ritwickdey.liveserver",
         "ecmel.vscode-html-css",
-        "ms-vscode.live-server",
         "pranaygp.vscode-css-peek"
     ]
 }

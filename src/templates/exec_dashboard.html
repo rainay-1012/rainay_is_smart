@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="X-UA-Compatible"
+      content="IE=edge"
+    />
+    <title>Executive Dashboard</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+  </head>
+  <body
+    id="body-pd"
+    class="bg-light"
+  >
+    <header
+      class="header bg-primary-subtle"
+      id="header"
+    >
+      <div class="header_toggle">
+        <i
+          class="bx bx-menu"
+          id="header-toggle"
+        ></i>
+      </div>
+      <div class="d-flex align-items-center">
+        <button
+          type="button"
+          class="btn btn-success me-3"
+          data-bs-toggle="modal"
+          data-bs-target="#purchaseModal"
+        >
+          Purchase order
+        </button>
+        <button
+          id="chatOpen"
+          type="button"
+          class="btn btn-primary d-flex justify-content-center align-content-center rounded-circle"
+          style="padding: 12px"
+        >
+          <i class="bx bxs-message-dots"></i>
+        </button>
+        <div class="text-dark ms-2 position-relative dropdown">
+          <button
+            type="button"
+            class="profile-icon border-0"
+            style="
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              background-image: url('https://via.placeholder.com/40');
+              background-size: cover;
+              background-position: center;
+              cursor: pointer;
+            "
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+          ></button>
+          <div class="dropdown-menu mt-2 p-3">
+            <div class="h6">User Details</div>
+            <p class="small"><strong>User ID:</strong> 12345</p>
+            <p class="small"><strong>Username:</strong> johndoe</p>
+            <p class="small"><strong>Position:</strong> Developer</p>
+            <button
+              id="signoutButton"
+              class="btn btn-primary"
+            >
+              SignOut
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      id="sidebar"
+      class="chat-container bg-light"
+    >
+      <div class="chat-container-content h-100">
+        <div class="container p-3 h-100 d-flex flex-column">
+          <div class="card w-100 mt-3 flex-grow-1">Maybe Chatroom here</div>
+          <button
+            id="chatClose"
+            class="btn btn-primary ms-auto me-3 d-flex justify-content-center align-content-center rounded-circle p-2"
+          >
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      id="overlay"
+      class="overlay"
+    ></div>
+    <div
+      class="l-navbar"
+      id="nav-bar"
+    >
+      <nav class="nav">
+        <div>
+          <a
+            href="#"
+            class="nav_logo"
+          >
+            <img
+              src="<%= require('../assets/logo only.svg') %>"
+              alt="Vendosync Logo"
+              class="nav_logo-icon"
+              height="30"
+            />
+            <span class="nav_logo-name">Vendosync</span>
+          </a>
+          <div class="nav_list">
+            <a
+              href="vendor_management.html"
+              class="nav_link active"
+            >
+              <i class="bx bx-grid-alt nav_icon"></i>
+              <span class="nav_name">Vendors</span>
+            </a>
+            <a
+              href="#"
+              class="nav_link"
+            >
+              <i class="bx bx-message-square-detail nav_icon"></i>
+              <span class="nav_name">Messages</span>
+            </a>
+            <a
+              href="#"
+              class="nav_link"
+            >
+              <i class="bx bx-basket nav_icon"></i>
+              <span class="nav_name">Purchase Order</span>
+            </a>
+            <a
+              href="#"
+              class="nav_link"
+            >
+              <i class="bx bx-store nav_icon"></i>
+              <span class="nav_name">Vendor Management</span>
+            </a>
+            <a
+              href="#"
+              class="nav_link"
+            >
+              <i class="bx bx-receipt nav_icon"></i>
+              <span class="nav_name">Files</span>
+            </a>
+            <a
+              href="#"
+              class="nav_link"
+            >
+              <i class="bx bx-bar-chart-alt-2 nav_icon"></i>
+              <span class="nav_name">Stats</span>
+            </a>
+            <a
+              href="./profile.html"
+              class="nav_link"
+            >
+              <i class="bx bx-user nav_icon"></i>
+              <span class="nav_name">Users</span>
+            </a>
+          </div>
+        </div>
+        <a
+          href="./login.html"
+          class="nav_link"
+        >
+          <i class="bx bx-log-out nav_icon"></i>
+          <span class="nav_name">SignOut</span>
+        </a>
+      </nav>
+    </div>
+
+    <!--Container Main start-->
+
+    <div
+      id="main-container"
+      class="pt-1 pe-3"
+    >
+      <div class="row mt-2">
+        <div class="col-md-7">
+          <div class="card">
+            <div class="card-header">Adding new procurement</div>
+            <div class="card-body py-0">
+              <div class="row">
+                <div class="col-md-8 py-3">
+                  <div class="row gy-4">
+                    <div class="col-md-12 d-flex align-items-center">
+                      <div class="form-floating me-3 flex-grow-1">
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="floatingInput"
+                          placeholder="name@example.com"
+                        />
+                        <label for="floatingInput">Item name</label>
+                      </div>
+                      <div class="form-floating me-3 flex-grow-1">
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="floatingInput"
+                          placeholder="name@example.com"
+                        />
+                        <label for="floatingInput">Item count</label>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-primary d-flex justify-content-center align-content-center"
+                      >
+                        <i class="bx bx-add-to-queue my-1 fs-5"></i>
+                      </button>
+                    </div>
+                    <div class="col-md-12">
+                      <table class="table table-borderless">
+                        <thead>
+                          <tr class="border-bottom">
+                            <th
+                              scope="col"
+                              style="width: 80%"
+                              class="border-end"
+                            >
+                              Name
+                            </th>
+                            <th
+                              scope="col"
+                              style="width: 20%"
+                              class="ps-3"
+                            >
+                              Count
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="border-end">Otto</td>
+                            <td class="ps-3">1</td>
+                          </tr>
+                          <tr>
+                            <td class="border-end">Thornton</td>
+                            <td class="ps-3">2</td>
+                          </tr>
+                          <tr>
+                            <td class="border-end">the Bird</td>
+                            <td class="ps-3">3</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 py-2 border-start">
+                  <table class="table table-borderless">
+                    <thead class="thead-light">
+                      <tr>
+                        <th class="border-bottom">Categoray</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Container Main End here -->
+
+    <div
+      class="modal fade"
+      id="purchaseModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="purchaseModalLabel"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered"
+        role="document"
+      >
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5
+              class="modal-title"
+              id="purchaseModalLabel"
+            >
+              Modal example
+            </h5>
+            <button
+              type="button"
+              class="ms-auto rounded-circle d-flex align-items-center p-2 border-0 bg-transparent"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            >
+              <i class="bx bx-x"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="exampleFormControlInput1">Email address</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="exampleFormControlInput1"
+                  placeholder="name@example.com"
+                />
+              </div>
+              <div class="form-group">
+                <label for="exampleFormControlSelect1">Example select</label>
+                <select
+                  class="form-control"
+                  id="exampleFormControlSelect1"
+                >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="exampleFormControlSelect2"
+                  >Example multiple select</label
+                >
+                <select
+                  multiple
+                  class="form-control"
+                  id="exampleFormControlSelect2"
+                >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="exampleFormControlTextarea1"
+                  >Example textarea</label
+                >
+                <textarea
+                  class="form-control"
+                  id="exampleFormControlTextarea1"
+                  rows="3"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+            >
+              Save changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

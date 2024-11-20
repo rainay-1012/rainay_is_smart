@@ -13,6 +13,11 @@ module.exports = {
     login: "./src/js/login.js", // Entry for index.html
     register: "./src/js/register.js", // Entry for about.html
     dev_dashboard: "./src/js/dev_dashboard.js",
+    mgr_dashboard: "./src/js/mgr_dashboard.js",
+    vendor_management: "./src/js/vendor_management.js",
+    vendor_add: "./src/js/vendor_add.js",
+    profile: "./src/js/profile.js",
+    exec_dashboard: "./src/js/exec_dashboard.js",
   },
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -23,15 +28,6 @@ module.exports = {
     splitChunks: {
       chunks: "all", // Automatically split shared code
       minChunks: 2, // If a module is used in at least 2 entry points, extract it
-      cacheGroups: {
-        defaultVendors: {
-          test: /[\\/]node_modules[\\/]/, // Extract code from node_modules
-        },
-        styles: {
-          test: /\.(css|scss|less)$/,
-          enforce: true, // force css in new chunks (ignores all other options)
-        },
-      },
     },
   },
   module: {
@@ -71,17 +67,42 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/templates/login.html", // Template
       filename: "./index.html", // Output file
-      chunks: ["login", "vendors", "common"], // Inject the corresponding JS and CSS for the index page
+      chunks: ["login"], // Inject the corresponding JS and CSS for the index page
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/register.html", // Template
       filename: "./register.html", // Output file
-      chunks: ["register", "vendors", "common"], // Inject the corresponding JS and CSS for the index page
+      chunks: ["register"], // Inject the corresponding JS and CSS for the index page
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/dev_dashboard.html", // Template
       filename: "./dev_dashboard.html", // Output file
-      chunks: ["dev_dashboard", "vendors", "common"], // Inject the corresponding JS and CSS for the index page
+      chunks: ["dev_dashboard"], // Inject the corresponding JS and CSS for the index page
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/mgr_dashboard.html", // Template
+      filename: "./mgr_dashboard.html", // Output file
+      chunks: ["mgr_dashboard"], // Inject the corresponding JS and CSS for the index page
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/vendor_management.html", // Template
+      filename: "./vendor_management.html", // Output file
+      chunks: ["vendor_management"], // Inject the corresponding JS and CSS for the index page
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/vendor_add.html", // Template
+      filename: "./vendor_add.html", // Output file
+      chunks: ["vendor_add"], // Inject the corresponding JS and CSS for the index page
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/profile.html", // Template
+      filename: "./profile.html", // Output file
+      chunks: ["profile"], // Inject the corresponding JS and CSS for the index page
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/exec_dashboard.html", // Template
+      filename: "./exec_dashboard.html", // Output file
+      chunks: ["exec_dashboard"], // Inject the corresponding JS and CSS for the index page
     }),
     new MiniCssExtractPlugin({
       filename: "style/[name].css", // Outputs index.css, about.css
@@ -93,6 +114,6 @@ module.exports = {
     static: path.join(__dirname, "dist"),
     hot: true, // Enable hot module replacement
     open: true, // Open browser automatically
-    port: 8080, // Port for the dev server
+    port: 8081, // Port for the dev server
   },
 };

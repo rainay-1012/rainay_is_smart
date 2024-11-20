@@ -16,8 +16,8 @@ import "../style/auth.scss";
       "submit",
       (event) => {
         // if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         // }
 
         form.classList.add("was-validated");
@@ -31,16 +31,16 @@ const signin = document.querySelector("#signin");
 const role = document.querySelector("#role");
 
 signin.addEventListener("click", (event) => {
-
   switch (role.value) {
     case "1":
-      window.location.href = 'dev_dashboard.html';
+      window.location.replace("dev_dashboard.html");
       break;
     case "2":
-      // window.location.href = 'newPage.html';
+      window.location.replace("mgr_dashboard.html");
+
       break;
     case "3":
-      // window.location.href = 'newPage.html';
+      window.location.replace("exec_dashboard.html");
       break;
     default:
     // code block
