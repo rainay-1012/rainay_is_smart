@@ -1,20 +1,32 @@
-.table-button {
-    font-size: 0.8rem;
-    width: 4rem;
+@use "custom_theme.scss";
+.active-underline {
+  padding-inline: 0 !important;
+  margin-right: 0.75rem;
+  position: relative;
+  border: none !important;
+  min-width: 6rem;
+
+  &.active {
+    color: var(--bs-primary) !important;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0%;
+      left: 0%;
+      height: 2px;
+      width: 100%;
+      background-color: var(--bs-primary);
+    }
+  }
 }
 
-.dt-container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    .dt-layout-table {
-        margin-bottom: auto;
-    }
-    .dt-select-checkbox {
-        accent-color: #6c757d;
-    }
+#companyChart,
+#tokenChart {
+  min-height: 350px;
+  height: 100%;
+  width: 100%;
 }
-
-.extra-small {
-    font-size:  0.75rem;
+#companyTable td {
+  text-align: center; /* Horizontal centering */
 }

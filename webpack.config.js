@@ -1,43 +1,58 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const webpack = require("webpack");
+const Dotenv = require("dotenv-webpack");
+const dotenv = require("dotenv");
+const PreloadWebpackPlugin = require("@vue/preload-webpack-plugin");
+
+dotenv.config();
+const isProduction = process.env.PRODUCTION === "1";
 
 module.exports = {
   mode: "development", // Change to 'production' when you're ready to deploy
-  optimization: {
-    splitChunks: {
-      chunks: "all", // Split both JavaScript and CSS
-    },
-  },
   entry: {
-    login: "./src/js/login.js", // Entry for index.html
-    register: "./src/js/register.js", // Entry for about.html
-    dev_dashboard: "./src/js/dev_dashboard.js",
-    mgr_dashboard: "./src/js/mgr_dashboard.js",
-    vendor_management: "./src/js/vendor_management.js",
-    vendor_add: "./src/js/vendor_add.js",
-    profile: "./src/js/profile.js",
-    exec_dashboard: "./src/js/exec_dashboard.js",
+    entry: "./src/js/index.js",
+  },
+  stats: {
+    warningsFilter: /postcss|css-loader|sass-loader/,
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "js/[name].bundle.js", // Outputs index.bundle.js, about.bundle.js
+    filename: "static/js/bundle.js", // Outputs index.bundle.js, about.bundle.js
     clean: true, // Clean the dist folder before each build
-  },
-  optimization: {
-    splitChunks: {
-      chunks: "all", // Automatically split shared code
-      minChunks: 2, // If a module is used in at least 2 entry points, extract it
-    },
+    publicPath: isProduction ? "/dist/" : "/",
   },
   module: {
     rules: [
       {
-        test: /\.scss$/, // Match .scss files
+        test: /\.(scss)$/,
         use: [
-          MiniCssExtractPlugin.loader, // Extract CSS to separate file
-          "css-loader", // Resolves CSS imports
-          "sass-loader", // Compiles SCSS to CSS
+          MiniCssExtractPlugin.loader,
+          {
+            loader: "css-loader", // translates CSS into CommonJS modules
+          },
+          {
+            loader: "postcss-loader", // Run post css actions
+            options: {
+              postcssOptions: {
+                plugins: function () {
+                  // post css plugins, can be exported to postcss.config.js
+                  return [require("precss"), require("autoprefixer")];
+                },
+                silent: true,
+                warnings: false,
+              },
+            },
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              sassOptions: {
+                quietDeps: true,
+              },
+            },
+          },
         ],
       },
       {
@@ -48,66 +63,121 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg)$/, // Match image files
+        test: /\.(png|jpg|jpeg|gif|svg|ico)$/, // Match image files
         type: "asset/resource", // This handles images as resources
         generator: {
-          filename: "assets/[hash][ext][query]", // Define path and naming convention for images
+          filename: "static/assets/[hash][ext][query]", // Define path and naming convention for images
         },
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
         type: "asset/resource",
         generator: {
-          filename: "assets/[name][ext][query]", // Customize the path as needed
+          filename: "static/assets/[name][ext]", // Customize the path as needed
         },
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
+      template: "./src/templates/index.html", // Template
+      filename: "index.html", // Output file
+      inject: "body",
+    }),
+    new HtmlWebpackPlugin({
       template: "./src/templates/login.html", // Template
-      filename: "./index.html", // Output file
-      chunks: ["login"], // Inject the corresponding JS and CSS for the index page
+      filename: "login.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/register.html", // Template
-      filename: "./register.html", // Output file
-      chunks: ["register"], // Inject the corresponding JS and CSS for the index page
+      filename: "register.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/dev_dashboard.html", // Template
-      filename: "./dev_dashboard.html", // Output file
-      chunks: ["dev_dashboard"], // Inject the corresponding JS and CSS for the index page
+      filename: "dev_dashboard.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/mgr_dashboard.html", // Template
-      filename: "./mgr_dashboard.html", // Output file
-      chunks: ["mgr_dashboard"], // Inject the corresponding JS and CSS for the index page
+      filename: "mgr_dashboard.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/vendor_management.html", // Template
-      filename: "./vendor_management.html", // Output file
-      chunks: ["vendor_management"], // Inject the corresponding JS and CSS for the index page
+      filename: "vendor_management.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/vendor_add.html", // Template
-      filename: "./vendor_add.html", // Output file
-      chunks: ["vendor_add"], // Inject the corresponding JS and CSS for the index page
+      filename: "vendor_add.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/profile.html", // Template
-      filename: "./profile.html", // Output file
-      chunks: ["profile"], // Inject the corresponding JS and CSS for the index page
+      filename: "profile.html", // Output file
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/exec_dashboard.html", // Template
-      filename: "./exec_dashboard.html", // Output file
-      chunks: ["exec_dashboard"], // Inject the corresponding JS and CSS for the index page
+      filename: "exec_dashboard.html", // Output file
+      inject: false,
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/verification_email.html", // Template
+      filename: "verification_email.html", // Output file
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/company_email.html", // Template
+      filename: "company_email.html", // Output file
+      inject: false,
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/email_verified.html", // Template
+      filename: "email_verified.html", // Output file
+      inject: false,
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/error.html", // Template
+      filename: "error.html", // Output file
+      inject: false,
     }),
     new MiniCssExtractPlugin({
-      filename: "style/[name].css", // Outputs index.css, about.css
+      filename: "static/style/bundle.css", // Outputs index.css, about.css
+    }),
+    new webpack.ProvidePlugin({
+      process: "process/browser", // Automatically provide the process polyfill
+    }),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery",
+    }),
+    new Dotenv({
+      path: ".env", // Adjust the path to your .env file
+    }),
+    new PreloadWebpackPlugin({
+      rel: "preload", // Use preload
+      as(entry) {
+        if (/\.(woff2|woff|ttf|eot)$/.test(entry)) return "font"; // Preload fonts
+        if (/\.(png|jpe?g|gif|svg|webp)$/.test(entry)) return "image"; // Preload images
+        return undefined; // Skip other asset types
+      },
+      includeHtmlNames: ["index.html", "error.html"],
+      include: "allAssets",
     }),
   ],
+  resolve: {
+    fallback: {
+      os: require.resolve("os-browserify/browser"),
+      crypto: require.resolve("crypto-browserify"),
+      buffer: require.resolve("buffer/"),
+      stream: require.resolve("stream-browserify"),
+      path: require.resolve("path-browserify"),
+      process: require.resolve("process/browser"),
+      vm: require.resolve("vm-browserify"),
+    },
+  },
   devtool: "source-map", // Generate source maps for easier debugging
   devServer: {
     devMiddleware: { writeToDisk: true },

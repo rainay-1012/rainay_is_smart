@@ -70,10 +70,95 @@ CREATE TABLE `user` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `vendor`
+--
+
+DROP TABLE IF EXISTS `vendor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vendor` (
+  `id` varchar(128) NOT NULL,
+  `name` varchar(150) DEFAULT NULL,
+  `address` varchar(150) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `company_size` enum('small','medium','big') NOT NULL,
+  `pic_phone_number` varchar(150) DEFAULT NULL,
+  `bank_name` varchar(150) DEFAULT NULL,
+  `bank_acc_number` int(11) DEFAULT NULL,
+  `gred` enum('A','B','C','D','E') DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `item`
+--
+
+DROP TABLE IF EXISTS `item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `item` (
+  `id` varchar(128) NOT NULL,
+  `name` varchar(150) DEFAULT NULL,
+  `address` varchar(150) DEFAULT NULL,
+  `category` varchar(150) DEFAULT NULL,
+  `price` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `rfq_id` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `rfq_id` (`rfq_id`),
+  CONSTRAINT `item_ibfk_1` FOREIGN KEY (`rfq_id`) REFERENCES `rfq` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rfq`
+--
+
+DROP TABLE IF EXISTS `rfq`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rfq` (
+  `id` varchar(128) NOT NULL,
+  `pic_name` varchar(150) DEFAULT NULL,
+  `date` datetime NOT NULL DEFAULT current_timestamp(),
+  `expired_date` datetime NOT NULL,
+  `payment_term` varchar(150) DEFAULT NULL,
+  `total_price` varchar(150) DEFAULT NULL,
+  `vendor_id` varchar(128) NOT NULL,
+  `item_id` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `vendor_id` (`vendor_id`),
+  KEY `item_id` (`item_id`),
+  CONSTRAINT `rfq_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`id`),
+  CONSTRAINT `rfq_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `purchase_order`
+--
+
+DROP TABLE IF EXISTS `purchase_order`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `purchase_order` (
+  `id` varchar(128) NOT NULL,
+  `date` datetime NOT NULL DEFAULT current_timestamp(),
+  `payment_term` varchar(150) DEFAULT NULL,
+  `vendor_id` varchar(128) NOT NULL,
+  `item_id` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `vendor_id` (`vendor_id`),
+  KEY `item_id` (`item_id`),
+  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`id`),
+  CONSTRAINT `purchase_order_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
 -- Dumping routines for database 'vendosync'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -82,4 +167,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-19 20:19:34
+-- Dump completed on 2024-11-30 20:19:34

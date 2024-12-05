@@ -1,93 +1,175 @@
-import "bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "boxicons/css/boxicons.min.css";
-import "../assets/logo only.svg";
+import "marked";
+import { marked } from "marked";
+import { currentRoute, getRouteFromPath, navigate, routes } from ".";
 import "../style/mgr_dashboard.scss";
-import { fetchMainContent } from "./content_switcher.js";
+import { getCurrentUserToken } from "./authentication";
 
-document.addEventListener("DOMContentLoaded", async function (event) {
-  history.replaceState(
-    { link: "mgr_dashboard.html" },
-    "",
-    "mgr_dashboard.html"
-  );
-  const mainContainer = document.querySelector("#main-container");
-  const navLinks = document.querySelectorAll(".nav_link");
+export async function initManager() {
+  // document
+  //   .querySelector("#signoutBtn")
+  //   .addEventListener("click", async (evt) => {
+  //     await logout();
+  //   });
 
-  await fetchMainContent(
-    navLinks.item(0).attributes.getNamedItem("href").textContent,
-    mainContainer
-  );
+  const sidebarToggler = document.querySelector("#sidebar-toggler");
+  const sidebar = document.querySelector("#sidebar");
+  const header = document.querySelector("#header");
+  const contentContainer = document.querySelector("#content-container");
+  let isOpen = false;
 
-  navLinks.forEach((elm) => {
-    elm.addEventListener("click", async (evt) => {
-      evt.preventDefault();
-      evt.stopPropagation();
-      const href = elm.attributes.getNamedItem("href");
-      await fetchMainContent(href.textContent, mainContainer);
-      return false;
+  function toggleChat() {
+    isOpen = !isOpen;
+    sidebar.classList.toggle("open");
+    header.classList.toggle("open");
+    sidebarToggler.classList.toggle("bx-menu");
+    sidebarToggler.classList.toggle("bx-chevrons-left");
+    contentContainer.classList.toggle("shrink");
+  }
+
+  sidebarToggler.addEventListener("click", toggleChat);
+
+  const mediaQuery = window.matchMedia("(min-width: 768px)");
+
+  function handleMediaQueryChange(e) {
+    if (e.matches && !isOpen) {
+      sidebar.classList.add("open");
+      header.classList.add("open");
+      sidebarToggler.classList.remove("bx-menu");
+      sidebarToggler.classList.add("bx-chevrons-left");
+      contentContainer.classList.add("shrink");
+    } else {
+      sidebar.classList.remove("open");
+      header.classList.remove("open");
+      sidebarToggler.classList.add("bx-menu");
+      sidebarToggler.classList.remove("bx-chevrons-left");
+      contentContainer.classList.remove("shrink");
+    }
+  }
+
+  mediaQuery.addEventListener("change", handleMediaQueryChange);
+  handleMediaQueryChange(mediaQuery);
+
+  const chatInput = document.querySelector("#chat-input");
+  chatInput.style.height = `${chatInput.scrollHeight}px`;
+
+  const chatOnInput = (event) => {
+    const target = event.target;
+    target.style.height = "auto";
+
+    if (target.scrollHeight > parseInt(getComputedStyle(target).maxHeight)) {
+      target.style.overflowY = "scroll";
+      target.style.height = `${parseInt(getComputedStyle(target).maxHeight)}px`;
+      target.scrollTop = target.scrollHeight;
+    } else {
+      target.style.overflowY = "hidden";
+      target.style.height = `${target.scrollHeight}px`;
+    }
+  };
+
+  chatInput.addEventListener("input", chatOnInput);
+
+  const barLinks = document.querySelectorAll(".bar-link");
+
+  const navigateLink = async (evt) => {
+    evt.preventDefault();
+
+    barLinks.forEach((link) => {
+      link.classList.remove("active");
     });
+    evt.currentTarget.classList.add("active");
+
+    await navigate(getRouteFromPath(evt.currentTarget.pathname), {
+      blockParams: {
+        zIndex: 10,
+      },
+    });
+  };
+
+  const chatInputContainer = document.querySelector("#chat-input-container");
+  const chatContent = document.querySelector("#chat-content");
+  const defaultChatContent = document.querySelector("#chat-content-template");
+  const userMessageTemplate = document.querySelector("#user-message-template");
+  const userReplyTemplate = document.querySelector("#user-reply-template");
+
+  let reset = false;
+
+  function insertDefaultContent() {
+    reset = false;
+    chatContent.innerHTML = "";
+    chatContent.appendChild(defaultChatContent.content.cloneNode(true));
+  }
+
+  insertDefaultContent();
+
+  async function onChatInput(evt) {
+    evt.preventDefault();
+    if (!reset) {
+      chatContent.innerHTML = "";
+      reset = true;
+    }
+    const data = new FormData(chatInputContainer);
+    chatInputContainer.reset();
+    const userMessage = userMessageTemplate.content.cloneNode(true);
+    userMessage.querySelector(".user-message").innerHTML =
+      data.get("chat-input");
+    chatContent.appendChild(userMessage);
+
+    const response = await fetch("/consult", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${await getCurrentUserToken()}`,
+      },
+      body: data,
+    });
+    if (!response.ok) {
+      console.log(response.statusText);
+      return;
+    }
+    const userReply = userReplyTemplate.content.cloneNode(true);
+    const userReplyContent = userReply.querySelector(".user-reply");
+    userReplyContent.innerHTML = "";
+    let reply = "";
+    chatContent.appendChild(userReplyContent);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      reply += chunk;
+      userReplyContent.innerHTML = marked(reply);
+    }
+  }
+
+  chatInputContainer.addEventListener("submit", onChatInput);
+
+  barLinks.forEach((link) => {
+    link.addEventListener("click", navigateLink);
   });
 
-  window.onpopstate = async function (event) {
-    if (event.state.link == "mgr_dashboard.html") {
-      window.location.replace(mgr_dashboard.html);
-    }
-    if (event.state && event.state.link) {
-      await fetchMainContent(event.state.link, mainContainer, false);
-    }
-  };
-
-  const showNavbar = (toggleId, navId, bodyId, headerId) => {
-    const toggle = document.getElementById(toggleId),
-      nav = document.getElementById(navId),
-      bodypd = document.getElementById(bodyId),
-      headerpd = document.getElementById(headerId);
-
-    // Validate that all variables exist
-    if (toggle && nav && bodypd && headerpd) {
-      toggle.addEventListener("click", () => {
-        // show navbar
-        nav.classList.toggle("show-sidebar");
-        // change icon
-        toggle.classList.toggle("bx-x");
-        // add padding to body
-        bodypd.classList.toggle("body-pd");
-        // add padding to header
-        headerpd.classList.toggle("body-pd");
-      });
-    }
-  };
-
-  showNavbar("header-toggle", "nav-bar", "body-pd", "header");
-
-  /*===== LINK ACTIVE =====*/
-  const linkColor = document.querySelectorAll(".nav_link");
-
-  function colorLink() {
-    if (linkColor) {
-      linkColor.forEach((l) => l.classList.remove("active"));
-      this.classList.add("active");
-    }
-  }
-  linkColor.forEach((l) => l.addEventListener("click", colorLink));
-
-  const chatContainer = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-
-  document
-    .querySelectorAll("#chatClose, #chatOpen, #overlay")
-    .forEach((elm) => {
-      elm.addEventListener("click", () => {
-        toggleSidebar();
-      });
+  if (currentRoute === routes.manager) {
+    await navigate(routes.vendor, {
+      replace: true,
+      blockParams: { zIndex: 10 },
     });
-
-  function toggleSidebar() {
-    chatContainer.classList.toggle("open");
-
-    if (overlay) {
-      overlay.classList.toggle("open");
-    }
   }
-});
+
+  barLinks.forEach((link) => {
+    if (currentRoute.path === link.pathname) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+
+  return new Promise((resolve) => {
+    resolve(() => {
+      sidebarToggler.removeEventListener("click", toggleChat);
+      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+      chatInput.removeEventListener("input", chatInput);
+      chatInputContainer.removeEventListener("submit", onChatInput);
+      console.log("Manager dashboard disposed");
+    });
+  });
+}

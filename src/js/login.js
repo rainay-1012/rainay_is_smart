@@ -1,48 +1,95 @@
-import "bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "../assets/Login Widget.svg";
-import "../assets/logo only.svg";
 import "../style/auth.scss";
+import { login, logout } from "./authentication.js";
+import {
+  blockElement,
+  getRouteFromPath,
+  navigate,
+  routes,
+  unblockElement,
+} from "./index.js";
 
-(() => {
-  "use strict";
+export async function initLogin() {
+  await logout();
 
-  // Fetch all the forms we want to apply custom Bootstrap validation styles to
-  const forms = document.querySelectorAll(".needs-validation");
+  const registerButton = document.querySelector("#register");
+  const loginForm = document.querySelector("#loginForm");
+  const emailField = loginForm.querySelector("#email");
+  const passwordField = loginForm.querySelector("#password");
+  const submitButton = loginForm.querySelector("button[type=submit]");
 
-  // Loop over them and prevent submission
-  Array.from(forms).forEach((form) => {
-    form.addEventListener(
-      "submit",
-      (event) => {
-        // if (!form.checkValidity()) {
-        event.preventDefault();
-        event.stopPropagation();
-        // }
-
-        form.classList.add("was-validated");
+  const registerClickHandler = async () => {
+    await navigate(routes.register, {
+      blockParams: {
+        grow: true,
       },
-      false
-    );
+    });
+  };
+  registerButton.addEventListener("click", registerClickHandler);
+
+  const loginSubmitHandler = async (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    const fields = loginForm.querySelectorAll("input");
+    fields.forEach((field) => {
+      field.setCustomValidity("");
+    });
+
+    if (loginForm.checkValidity()) {
+      const data = new FormData(loginForm);
+      const email = data.get("email");
+      const password = data.get("password");
+      const remember = data.has("remember");
+      try {
+        blockElement(submitButton, {
+          small: true,
+          opacity: 0,
+          primary: false,
+        });
+        const response = await login({ email, password, remember });
+        console.log(`redirect to:`);
+        navigate(getRouteFromPath(response.redirect_to), {
+          replace: true,
+          blockParams: {
+            grow: true,
+          },
+        });
+      } catch (error) {
+        const errorCode = error.code;
+        switch (errorCode) {
+          case "auth/invalid-credential":
+            emailField.nextElementSibling.nextElementSibling.innerHTML =
+              "Invalid login credential.";
+            passwordField.nextElementSibling.nextElementSibling.innerHTML = "";
+            emailField.setCustomValidity("Invalid login credential.");
+            passwordField.setCustomValidity("Invalid login credential.");
+            break;
+          default:
+            alert(`${errorCode} : ${error.message}`);
+        }
+      } finally {
+        unblockElement(submitButton);
+      }
+    } else {
+      const invalidFields = loginForm.querySelectorAll(":invalid");
+      invalidFields.forEach((field) => {
+        console.log(`Error in field ${field.name}: ${field.validationMessage}`);
+        field.nextElementSibling.nextElementSibling.textContent =
+          field.validationMessage;
+      });
+    }
+
+    loginForm.classList.add("was-validated");
+    return false;
+  };
+
+  loginForm.addEventListener("submit", loginSubmitHandler);
+
+  return new Promise((resolve) => {
+    resolve(() => {
+      registerButton.removeEventListener("click", registerClickHandler);
+      loginForm.removeEventListener("submit", loginSubmitHandler);
+      console.log("Login disposed");
+    });
   });
-})();
-
-const signin = document.querySelector("#signin");
-const role = document.querySelector("#role");
-
-signin.addEventListener("click", (event) => {
-  switch (role.value) {
-    case "1":
-      window.location.replace("dev_dashboard.html");
-      break;
-    case "2":
-      window.location.replace("mgr_dashboard.html");
-
-      break;
-    case "3":
-      window.location.replace("exec_dashboard.html");
-      break;
-    default:
-    // code block
-  }
-});
+}

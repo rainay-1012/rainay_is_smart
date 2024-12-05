@@ -1,0 +1,49 @@
+// $primary: #007275;
+$primary: #06545b;
+$primary-rgb: 0, 114, 117;
+
+@import "../../node_modules/bootstrap/scss/functions";
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/mixins";
+
+$white: #ffffff;
+
+$theme-colors: (
+  "light": #d9f9fd,
+  "dark": #1a1744,
+  "primary": $primary,
+  // "secondary": #00b0a6,
+  "secondary": #8bbeb2,
+  "info": #1de1e2,
+  "success": #08b36c,
+  "warning": #e4d007,
+  "danger": #f42602,
+);
+
+$input-focus-border-color: $primary;
+$btn-focus-border-color: $primary;
+
+$theme-colors: $theme-colors;
+
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
+.form-check-input:checked {
+  background-color: $primary !important;
+  border-color: $primary !important;
+}
+
+.box-shadow-primary:focus:not(:invalid) {
+  box-shadow: 0 0 0 0.25rem rgba(138, 74, 248, 0.25) !important;
+}
+
+:root {
+  --dt-row-selected: #{$primary-rgb};
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+.text-orange {
+  color: $orange-500;
+}

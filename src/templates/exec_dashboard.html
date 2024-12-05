@@ -65,7 +65,7 @@
             <p class="small"><strong>Username:</strong> johndoe</p>
             <p class="small"><strong>Position:</strong> Developer</p>
             <button
-              id="signoutButton"
+              id="signoutBtn"
               class="btn btn-primary"
             >
               SignOut
@@ -181,41 +181,51 @@
       class="pt-1 pe-3"
     >
       <div class="row mt-2">
-        <div class="col-md-7">
+        <div class="col-md-12">
           <div class="card">
             <div class="card-header">Adding new procurement</div>
             <div class="card-body py-0">
               <div class="row">
-                <div class="col-md-8 py-3">
+                <div class="col-md-6 pt-3">
                   <div class="row gy-4">
-                    <div class="col-md-12 d-flex align-items-center">
-                      <div class="form-floating me-3 flex-grow-1">
-                        <input
-                          type="email"
-                          class="form-control"
-                          id="floatingInput"
-                          placeholder="name@example.com"
-                        />
-                        <label for="floatingInput">Item name</label>
-                      </div>
-                      <div class="form-floating me-3 flex-grow-1">
-                        <input
-                          type="email"
-                          class="form-control"
-                          id="floatingInput"
-                          placeholder="name@example.com"
-                        />
-                        <label for="floatingInput">Item count</label>
-                      </div>
-                      <button
-                        type="button"
-                        class="btn btn-primary d-flex justify-content-center align-content-center"
+                    <div class="col-md-12">
+                      <form
+                        id="procurementForm"
+                        class="d-flex align-items-center"
                       >
-                        <i class="bx bx-add-to-queue my-1 fs-5"></i>
-                      </button>
+                        <div class="form-floating me-3 flex-grow-1">
+                          <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            id="name"
+                            placeholder="Machine"
+                          />
+                          <label for="name">Item name</label>
+                        </div>
+                        <div class="form-floating me-3 flex-grow-1">
+                          <input
+                            type="number"
+                            name="count"
+                            class="form-control"
+                            id="count"
+                            placeholder="name@example.com"
+                          />
+                          <label for="count">Item count</label>
+                        </div>
+                        <button
+                          type="submit"
+                          class="btn btn-primary d-flex justify-content-center align-content-center"
+                        >
+                          <i class="bx bx-add-to-queue my-1 fs-5"></i>
+                        </button>
+                      </form>
                     </div>
                     <div class="col-md-12">
-                      <table class="table table-borderless">
+                      <table
+                        id="procurementTable"
+                        class="table table-borderless"
+                      >
                         <thead>
                           <tr class="border-bottom">
                             <th
@@ -234,34 +244,64 @@
                             </th>
                           </tr>
                         </thead>
-                        <tbody>
-                          <tr>
-                            <td class="border-end">Otto</td>
-                            <td class="ps-3">1</td>
-                          </tr>
-                          <tr>
-                            <td class="border-end">Thornton</td>
-                            <td class="ps-3">2</td>
-                          </tr>
-                          <tr>
-                            <td class="border-end">the Bird</td>
-                            <td class="ps-3">3</td>
-                          </tr>
-                        </tbody>
+                        <tbody></tbody>
                       </table>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-4 py-2 border-start">
+                <div class="col-md-2 py-2 border-start">
                   <table class="table table-borderless">
                     <thead class="thead-light">
                       <tr>
-                        <th class="border-bottom">Categoray</th>
+                        <th class="border-bottom">Category</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="selected">
+                        <td>Machine</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-md-4 py-2 border-start">
+                  <table
+                    class="table table-borderless justify-content-center align-content-center"
+                  >
+                    <thead>
+                      <tr class="border-bottom">
+                        <th
+                          scope="col"
+                          style="width: 80%"
+                          class="border-end"
+                        >
+                          Suggested vendor
+                        </th>
+                        <th
+                          scope="col"
+                          style="width: 20%"
+                          class="text-center"
+                        >
+                          <i
+                            class="bx bx-mail-send text-dark"
+                            style="width: 40"
+                          ></i>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td>1</td>
+                        <td class="border-end">Otto</td>
+                        <td class="text-center">
+                          <button
+                            type="button"
+                            class="btn btn-outline-primary d-flex align-items-center justify-content-center me-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addRFQModal"
+                          >
+                            <i class="bx bxs-message-dots"></i>
+                            RFQ
+                          </button>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -373,6 +413,198 @@
           </div>
         </div>
       </div>
+    </div>
+    <div
+      class="modal fade"
+      id="addRFQModal"
+      tabindex="-1"
+      role="dialog"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered"
+        role="document"
+      >
+        <form class="modal-content">
+          <div class="modal-header">
+            <h5
+              class="modal-title"
+              id="addRFQModal"
+            >
+              Request For Quotation
+            </h5>
+          </div>
+          <div class="modal-body">
+            <div>
+              <div class="form-group row mb-3">
+                <label
+                  for="package"
+                  class="col-sm-4 col-form-label"
+                  >Package</label
+                >
+                <div class="col-sm-8">
+                  <select
+                    id="package"
+                    name="package"
+                    class="form-select"
+                  >
+                    <option
+                      value="basic"
+                      selected
+                    >
+                      Basic
+                    </option>
+                    <option value="premium">Premium</option>
+                    <option value="deluxe">Deluxe</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row mb-3">
+                <label
+                  for="name"
+                  class="col-sm-4 col-form-label"
+                  >Name</label
+                >
+                <div class="col-sm-8">
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    class="form-control"
+                    placeholder="Example name"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <label
+                  for="address"
+                  class="col-sm-4 col-form-label"
+                  >Address</label
+                >
+                <div class="col-sm-8">
+                  <input
+                    id="address"
+                    name="address"
+                    type="text"
+                    class="form-control"
+                    placeholder="UUM Sintok"
+                  />
+                </div>
+              </div>
+              <div class="form-group row mb-3">
+                <label
+                  for="email"
+                  class="col-sm-4 col-form-label"
+                  >Email</label
+                >
+                <div class="col-sm-8">
+                  <input
+                    id="email"
+                    name="email"
+                    type="text"
+                    class="form-control"
+                    placeholder="example@gmail.com"
+                  />
+                  <div class="form-text extra-small">
+                    Token will be generated and sent to this email once
+                    submitted.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="card mt-2 card-body flex-grow-1 me-3">
+      <table
+        id="example"
+        class="table nowrap w-100"
+      >
+        <thead>
+          <tr>
+            <th>Purchase ID</th>
+            <th>Purchased Item</th>
+            <th>Vendor Company</th>
+            <th>PIC Email</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Purchase date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td scope="row">1</td>
+            <td>Zeen</td>
+            <td>Accountant</td>
+            <td>Edinburgh</td>
+            <td>Deluxe</td>
+            <td>2011-04-25</td>
+            <td>2011-04-25</td>
+          </tr>
+          <tr>
+            <td scope="row">2</td>
+            <td>Tiger Nixon</td>
+            <td>Accountant</td>
+            <td>Edinburgh</td>
+            <td>61</td>
+            <td>2011-04-25</td>
+            <td>2011-04-25</td>
+          </tr>
+          <tr>
+            <td scope="row">3</td>
+            <td>Tiger Nixon</td>
+            <td>Accountant</td>
+            <td>Edinburgh</td>
+            <td>61</td>
+            <td>2011-04-25</td>
+            <td>2011-04-25</td>
+          </tr>
+          <tr>
+            <td scope="row">3</td>
+            <td>Tiger Nixon</td>
+            <td>Accountant</td>
+            <td>Edinburgh</td>
+            <td>61</td>
+            <td>2011-04-25</td>
+            <td>2011-04-25</td>
+          </tr>
+          <tr>
+            <td scope="row">4</td>
+            <td>Tiger Nixon</td>
+            <td>Accountant</td>
+            <td>Edinburgh</td>
+            <td>61</td>
+            <td>2011-04-25</td>
+            <td>2011-04-25</td>
+          </tr>
+          <tr>
+            <td scope="row">5</td>
+            <td>Tiger Nixon</td>
+            <td>Accountant</td>
+            <td>Edinburgh</td>
+            <td>61</td>
+            <td>2011-04-25</td>
+            <td>2011-04-25</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </body>
 </html>
