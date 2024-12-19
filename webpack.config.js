@@ -9,14 +9,39 @@ const PreloadWebpackPlugin = require("@vue/preload-webpack-plugin");
 dotenv.config();
 const isProduction = process.env.PRODUCTION === "1";
 
+const htmlTemplates = [
+  "index.html",
+  "login.html",
+  "register.html",
+  "dev_dashboard.html",
+  "vendor.html",
+  "profile.html",
+  "rfq.html",
+  "verification_email.html",
+  "company_email.html",
+  "email_verified.html",
+  "error.html",
+  "procurement.html",
+  "item.html",
+  "dashboard.html",
+  "report.html",
+  "purchase.html",
+];
+
 module.exports = {
   mode: "development", // Change to 'production' when you're ready to deploy
   entry: {
-    entry: "./src/js/index.js",
+    entry: "./src/js/index.ts",
   },
-  stats: {
-    warningsFilter: /postcss|css-loader|sass-loader/,
-  },
+  ignoreWarnings: [
+    {
+      module: /sass-loader/,
+      message: /Deprecation Warning on line/,
+    },
+    {
+      message: /deprecation/i,
+    },
+  ],
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "static/js/bundle.js", // Outputs index.bundle.js, about.bundle.js
@@ -76,73 +101,22 @@ module.exports = {
           filename: "static/assets/[name][ext]", // Customize the path as needed
         },
       },
+      {
+        test: /\.ts$/, // Add TypeScript loader
+        use: "ts-loader", // Use ts-loader to handle TypeScript files
+        exclude: /node_modules/,
+      },
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: "./src/templates/index.html", // Template
-      filename: "index.html", // Output file
-      inject: "body",
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/login.html", // Template
-      filename: "login.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/register.html", // Template
-      filename: "register.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/dev_dashboard.html", // Template
-      filename: "dev_dashboard.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/mgr_dashboard.html", // Template
-      filename: "mgr_dashboard.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/vendor_management.html", // Template
-      filename: "vendor_management.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/vendor_add.html", // Template
-      filename: "vendor_add.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/profile.html", // Template
-      filename: "profile.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/exec_dashboard.html", // Template
-      filename: "exec_dashboard.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/verification_email.html", // Template
-      filename: "verification_email.html", // Output file
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/company_email.html", // Template
-      filename: "company_email.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/email_verified.html", // Template
-      filename: "email_verified.html", // Output file
-      inject: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/templates/error.html", // Template
-      filename: "error.html", // Output file
-      inject: false,
-    }),
+    ...htmlTemplates.map(
+      (template) =>
+        new HtmlWebpackPlugin({
+          template: `./src/templates/${template}`,
+          filename: template,
+          inject: template === "index.html",
+        })
+    ),
     new MiniCssExtractPlugin({
       filename: "static/style/bundle.css", // Outputs index.css, about.css
     }),
@@ -165,9 +139,11 @@ module.exports = {
       },
       includeHtmlNames: ["index.html", "error.html"],
       include: "allAssets",
+      crossorigin: "anonymous",
     }),
   ],
   resolve: {
+    extensions: [".ts", ".js"],
     fallback: {
       os: require.resolve("os-browserify/browser"),
       crypto: require.resolve("crypto-browserify"),
@@ -183,7 +159,7 @@ module.exports = {
     devMiddleware: { writeToDisk: true },
     static: path.join(__dirname, "dist"),
     hot: true, // Enable hot module replacement
-    open: true, // Open browser automatically
+    open: false, // Open browser automatically
     port: 8081, // Port for the dev server
   },
 };

@@ -27,7 +27,7 @@
           </div>
         </div>
         <form
-          id="loginForm"
+          id="login-form"
           class="needs-validation"
           novalidate
         >
@@ -83,6 +83,8 @@
             <a
               href="#!"
               class="fw-medium"
+              data-bs-toggle="modal"
+              data-bs-target="#forgotPasswordModal"
               >Forgot password?</a
             >
           </div>
@@ -99,6 +101,55 @@
       </div>
     </div>
   </div>
+
+  <form
+    class="modal fade"
+    id="forgotPasswordModal"
+    tabindex="-1"
+    aria-labelledby="forgotPasswordModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5
+            class="modal-title"
+            id="forgotPasswordModalLabel"
+          >
+            Forgot Password
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div novalidate>
+            <div class="form-floating mb-3">
+              <input
+                type="email"
+                class="form-control"
+                id="forgot-email"
+                name="email"
+                placeholder="Enter your email"
+                required
+              />
+              <label for="forgot-email">Email address</label>
+              <div class="invalid-feedback">Please provide a valid email.</div>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
+            >
+              Send Reset Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
   <div class="d-flex justify-content-center align-items-baseline mt-2">
     <span class="text-muted me-1">Dont have an account?</span>
     <span

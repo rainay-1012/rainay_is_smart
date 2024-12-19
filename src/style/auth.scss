@@ -17,7 +17,7 @@ div.form-group,
 }
 
 div.invalid-feedback {
-  height: 0px;
+  // height: 0px;
 }
 
 .form-check-input.is-valid ~ .form-check-label,
@@ -28,4 +28,42 @@ div.invalid-feedback {
 
 .invalid-feedback {
   font-size: 0.7rem;
+}
+
+.bs-tooltip-html .tooltip-inner {
+  max-width: 100%;
+  font-size: 12px;
+}
+
+.container-loading-bar {
+  position: relative;
+  overflow-x: hidden;
+
+  &::after {
+    z-index: 10001;
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 20%;
+    height: 3px;
+    background: var(--bs-primary);
+    top: 0;
+    animation: loading-bar 2s linear infinite;
+  }
+}
+
+@keyframes loading-bar {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+#form-carousel .carousel-item {
+  transition-duration: 0.5s;
 }

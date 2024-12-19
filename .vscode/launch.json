@@ -6,22 +6,25 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/app.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "openOnSessionStart",
+            "jinja": true,
+            "justMyCode": true
         },
         {
             "name": "Run npm start",
             "type": "node-terminal",
             "request": "launch",
             "command": "npm start",
-            "cwd": "${workspaceFolder}"
-        }
+            "cwd": "${workspaceFolder}",
+        },
     ],
     "compounds": [
         {
             "name": "Run Python and npm",
             "configurations": [
-                "Run npm start",
                 "Run Python Script",
+                "Run npm start",
             ]
         }
     ]

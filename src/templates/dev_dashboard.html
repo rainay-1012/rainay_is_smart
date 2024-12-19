@@ -1,5 +1,5 @@
 <main>
-  <header class="position-sticky w-100 z-3 top-0">
+  <header class="position-fixed w-100 z-3 top-0">
     <div class="bg-primary-subtle w-100 py-3">
       <div class="container d-flex justify-content-between align-items-center">
         <a
@@ -23,10 +23,7 @@
           class="btn btn-primary rounded-circle p-2 d-flex justify-content-center align-items-center"
           style="width: 36px; height: 36px"
         >
-          <i
-            class="bx bx-log-out text-light"
-            style="translate: -2px 0"
-          ></i>
+          <i class="bi bi-arrow-bar-right text-light"></i>
         </button>
       </div>
     </div>
@@ -55,7 +52,8 @@
               data-bs-target="#nav-company"
               role="tab"
             >
-              <i class="bi bi-building-fill-gear me-2"></i> <span>Company</span>
+              <i class="bi bi-building-fill-gear me-2"></i>
+              <span>Company</span>
             </button>
             <button
               type="button"
@@ -64,8 +62,24 @@
               data-bs-target="#nav-token"
               role="tab"
             >
-              <i class="bx bxs-key fs-5 me-2"></i>
+              <i
+                class="bi bi-key-fill fs-5 me-2"
+                style="rotate: 45deg; translate: 0 5px"
+              ></i>
               <span>Token</span>
+            </button>
+            <button
+              type="button"
+              class="nav-link active-underline py-3 d-flex justify-content-center align-items-end"
+              data-bs-toggle="tab"
+              data-bs-target="#nav-user"
+              role="tab"
+            >
+              <i
+                class="bi bi-person-fill fs-5 me-2"
+                style="translate: 0 5px"
+              ></i>
+              <span>User</span>
             </button>
           </div>
         </div>
@@ -80,7 +94,6 @@
       class="tab-pane fade"
       id="nav-token"
       role="tabpanel"
-      aria-labelledby="nav-profile-tab"
     >
       <div class="row gy-4">
         <div class="col-md-7 d-flex">
@@ -94,13 +107,13 @@
                 type="button"
                 class="btn btn-primary d-flex align-items-center justify-content-center"
               >
-                <i class="bx bx-refresh me-2 fs-5"></i>
+                <i class="bi bi-arrow-clockwise me-2"></i>
                 Refresh
               </button>
             </div>
             <div class="card-body">
               <table
-                id="tokenTable"
+                id="token-table"
                 class="table table-hover nowrap w-100"
               >
                 <thead>
@@ -122,8 +135,11 @@
             <div class="card-header border-0 bg-transparent fw-bold">
               Token Usage
             </div>
-            <div class="card-body">
-              <div id="tokenChart"></div>
+            <div class="card-body d-flex">
+              <div
+                id="token-chart"
+                class="flex-grow-1"
+              ></div>
             </div>
           </div>
         </div>
@@ -133,7 +149,6 @@
       class="tab-pane fade show active"
       id="nav-company"
       role="tabpanel"
-      aria-labelledby="nav-home-tab"
     >
       <div class="row gy-4">
         <div class="col-md-6 col-sm-12">
@@ -225,9 +240,14 @@
         </div>
         <div class="col-md-6 col-sm-12 d-flex">
           <div class="card flex-grow-1">
-            <div class="card-header">Package Distribution by</div>
-            <div class="card-body">
-              <div id="companyChart"></div>
+            <div class="card-header border-0 bg-transparent fw-bold">
+              Package Distribution by
+            </div>
+            <div class="card-body d-flex">
+              <div
+                id="company-chart"
+                class="flex-grow-1"
+              ></div>
             </div>
           </div>
         </div>
@@ -241,10 +261,10 @@
                 <button
                   type="button"
                   data-bs-toggle="modal"
-                  data-bs-target="#addCompanyModal"
+                  data-bs-target="#company-modal"
                   class="btn btn-outline-primary d-flex align-items-center justify-content-center me-2"
                 >
-                  <i class="bx bx-add-to-queue me-2 fs-5"></i>
+                  <i class="bi bi-plus-lg me-2"></i>
                   Add
                 </button>
                 <button
@@ -252,14 +272,14 @@
                   type="button"
                   class="btn btn-primary d-flex align-items-center justify-content-center"
                 >
-                  <i class="bx bx-refresh me-2 fs-5"></i>
+                  <i class="bi bi-arrow-clockwise me-2"></i>
                   Refresh
                 </button>
               </div>
             </div>
             <div class="card-body">
               <table
-                id="companyTable"
+                id="company-table"
                 class="table table-hover nowrap w-100"
               >
                 <thead>
@@ -279,25 +299,245 @@
         </div>
       </div>
     </div>
+    <div
+      class="tab-pane fade"
+      id="nav-user"
+      role="tabpanel"
+    >
+      <div class="row gy-4">
+        <table
+          id="user-table"
+          class="table"
+          style="width: 100%"
+        >
+          <thead>
+            <tr>
+              <th class="text-center">ID</th>
+              <th>Photo</th>
+              <th class="text-center">Company Name</th>
+              <th class="text-center">Full Name</th>
+              <th class="text-center">Username</th>
+              <th class="text-center">Phone No.</th>
+              <th class="text-center">Email</th>
+              <th class="text-center">Position</th>
+              <th class="text-center">Date</th>
+              <th class="all">Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <div
+  <form
     class="modal fade"
-    id="addCompanyModal"
+    tabindex="-1"
+    id="edit-user-modal"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit User</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div
+            class="mb-3 d-flex flex-column align-items-center justify-content-center"
+          >
+            <div
+              id="photo"
+              class="w-50 dropzone border d-flex justify-content-center align-items-center p-0"
+            >
+              <!-- <div
+              class="dz-message"
+              data-dz-message
+            >
+              <div class="text-muted">Drop user photo</div>
+              <small class="text-small text-muted">(125 x 125 px)</small>
+            </div> -->
+            </div>
+          </div>
+          <input
+            type="text"
+            name="id"
+            hidden
+          />
+          <div class="mb-3">
+            <label
+              for="company"
+              class="form-label"
+              >Company Name</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="company"
+              name="company"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="company"
+              class="form-label"
+              >Full Name</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="username"
+              class="form-label"
+              >User Name</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="phoneNo"
+              class="form-label"
+              >Phone No.</label
+            >
+            <input
+              type="tel"
+              class="form-control"
+              id="phoneNo"
+              name="phoneNo"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="email"
+              class="form-label"
+              >Email</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="email"
+              name="email"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="position"
+              class="form-label"
+              >Position</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="position"
+              name="position"
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="date"
+              class="form-label"
+              >Date</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="date"
+              name="date"
+              readonly
+              disabled
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div
+    class="d-flex w-auto position-sticky"
+    style="bottom: 16px; padding-right: 16px"
+  >
+    <button
+      id="nav-dashboard"
+      type="button"
+      class="btn btn-primary rounded-circle ms-auto"
+      style="height: 46px; width: 46px"
+      window.location.href="/dashboard/vendor"
+      ;
+    >
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </div>
+
+  <form
+    class="modal fade"
+    id="company-modal"
     tabindex="-1"
     role="dialog"
-    aria-hidden="true"
   >
     <div
       class="modal-dialog modal-dialog-centered"
       role="document"
     >
-      <form class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Company Registration</h5>
+      <div class="modal-content">
+        <div
+          class="modal-header d-flex align-items-baseline justify-content-between"
+        >
+          <h5 class="modal-title">Company Management</h5>
+          <span class="text-muted d-add-none"
+            ><span class="extra-small">created</span>
+            <span
+              id="start-date"
+              class="small"
+            ></span>
+          </span>
         </div>
         <div class="modal-body">
-          <div>
+          <form>
+            <div class="form-group row mb-3 d-add-none">
+              <label
+                for="package"
+                class="col-sm-4 col-form-label"
+                >Id</label
+              >
+              <div class="col-sm-8">
+                <input
+                  id="id"
+                  name="id"
+                  type="text"
+                  class="form-control-plaintext"
+                  readonly
+                />
+              </div>
+            </div>
             <div class="form-group row mb-3">
               <label
                 for="package"
@@ -308,14 +548,9 @@
                 <select
                   id="package"
                   name="package"
-                  class="form-select"
+                  class="form-control"
                 >
-                  <option
-                    value="basic"
-                    selected
-                  >
-                    Basic
-                  </option>
+                  <option value="basic">Basic</option>
                   <option value="premium">Premium</option>
                   <option value="deluxe">Deluxe</option>
                 </select>
@@ -333,7 +568,6 @@
                   name="name"
                   type="text"
                   class="form-control"
-                  placeholder="Example name"
                 />
               </div>
             </div>
@@ -350,7 +584,6 @@
                   name="address"
                   type="text"
                   class="form-control"
-                  placeholder="UUM Sintok"
                 />
               </div>
             </div>
@@ -361,150 +594,25 @@
                 >Email</label
               >
               <div class="col-sm-8">
-                <input
-                  id="email"
-                  name="email"
-                  type="text"
-                  class="form-control"
-                  placeholder="example@gmail.com"
-                />
-                <div class="form-text extra-small">
-                  Token will be generated and sent to this email once submitted.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Close
-          </button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-          >
-            Submit
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div
-    class="modal fade"
-    id="companyManageModal"
-    tabindex="-1"
-    role="dialog"
-  >
-    <div
-      class="modal-dialog modal-dialog-centered"
-      role="document"
-    >
-      <div class="modal-content">
-        <div
-          class="modal-header d-flex align-items-baseline justify-content-between"
-        >
-          <h5 class="modal-title">Company Management</h5>
-          <span class="text-muted"
-            ><span class="extra-small">created</span>
-            <span
-              id="_startDate"
-              class="small"
-            ></span>
-          </span>
-        </div>
-        <div class="modal-body">
-          <form>
-            <div class="form-group row mb-3">
-              <label
-                for="_package"
-                class="col-sm-4 col-form-label"
-                >Id</label
-              >
-              <div class="col-sm-8">
-                <input
-                  id="_id"
-                  name="id"
-                  type="text"
-                  class="form-control-plaintext"
-                  readonly
-                />
-              </div>
-            </div>
-            <div class="form-group row mb-3">
-              <label
-                for="_package"
-                class="col-sm-4 col-form-label"
-                >Package</label
-              >
-              <div class="col-sm-8">
-                <input
-                  id="_package"
-                  name="packpage"
-                  type="text"
-                  class="form-control-plaintext"
-                  readonly
-                />
-              </div>
-            </div>
-            <div class="form-group row mb-3">
-              <label
-                for="_name"
-                class="col-sm-4 col-form-label"
-                >Name</label
-              >
-              <div class="col-sm-8">
-                <input
-                  id="_name"
-                  name="name"
-                  type="text"
-                  class="form-control"
-                />
-              </div>
-            </div>
-
-            <div class="form-group row mb-3">
-              <label
-                for="_address"
-                class="col-sm-4 col-form-label"
-                >Address</label
-              >
-              <div class="col-sm-8">
-                <input
-                  id="_address"
-                  name="address"
-                  type="text"
-                  class="form-control"
-                />
-              </div>
-            </div>
-            <div class="form-group row mb-3">
-              <label
-                for="_email"
-                class="col-sm-4 col-form-label"
-                >Email</label
-              >
-              <div class="col-sm-8">
                 <div class="input-group">
                   <input
-                    id="_email"
+                    id="email"
                     name="email"
                     type="text"
                     class="form-control"
                   />
                   <button
                     type="button"
-                    class="btn btn-warning"
+                    class="btn btn-warning d-add-none"
                     data-bs-toggle="tooltip"
                     data-bs-placement="right"
                     title="Resend tokens to the email"
                   >
-                    <i class="bx bx-mail-send text-light"></i>
+                    <i class="bi bi-envelope-at-fill text-light"></i>
                   </button>
+                </div>
+                <div class="form-text extra-small">
+                  Token will be generated and sent to this email once submitted.
                 </div>
               </div>
             </div>
@@ -519,7 +627,7 @@
             Close
           </button>
           <button
-            type="button"
+            type="submit"
             class="btn btn-primary"
           >
             Save changes
@@ -527,5 +635,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </form>
 </main>

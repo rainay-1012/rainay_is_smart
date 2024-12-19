@@ -2,124 +2,196 @@
   class="w-100 h-100 d-flex justify-content-center align-items-center flex-column bg-primary-subtle"
 >
   <div
-    id="register-card"
-    class="card shadow col-lg-5 col-md-8 col-sm-10 px-4 py-3"
+    class="p-4 rounded-4 shadow col-sm-12 col-md-8 bg-light flex-md-grow-0 flex-sm-grow-1"
+    id="card"
   >
-    <div class="text-center mb-3">
-      <!-- Logo here -->
+    <div>
       <img
         src="<%= require('../assets/logo only.svg') %>"
-        height="90"
-        class="mb-0"
+        height="60"
+        class="mb-2"
       />
-      <div class="fw-bold fs-3 d-flex justify-content-center">
-        <span class="text-primary me-0">Vendo</span>
-        <span>sync</span>
+    </div>
+    <div class="row gy-sm-5">
+      <div class="col-sm-12 col-md-6">
+        <div class="display-5 fw-normal h1 d-flex mb-3 text-primary">
+          Sign in
+        </div>
+        <div class="fw-normal">Verfiy your Token</div>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        <div
+          class="carousel slide"
+          id="form-carousel"
+          data-bs-touch="false"
+          data-bs-wrap="false"
+          data-bs-pause="false"
+          data-bs-keyboard="false"
+        >
+          <div class="carousel-inner">
+            <form
+              class="carousel-item active p-1 needs-validation"
+              novalidate
+              id="token-form"
+            >
+              <div>
+                <div
+                  class="form-floating user-select-none mb-5 position-relative"
+                >
+                  <input
+                    type="password"
+                    id="token"
+                    name="token"
+                    class="form-control"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="token"
+                    class="form-label"
+                    >Token</label
+                  >
+                  <div class="invalid-feedback">
+                    Please provide a valid token.
+                  </div>
+                  <span
+                    class="form-text link-primary pointer-cursor mt-1"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="A unique code from your company to register your Vendosync account."
+                    data-bs-custom-class="bs-tooltip-html"
+                    data-bs-placement="bottom"
+                    data-bs-container="#token-form .form-floating"
+                    data-bs-html="true"
+                    data-bs-boundary="#token-form"
+                  >
+                    What's token?
+                  </span>
+                </div>
+              </div>
+              <div class="mb-5">
+                Have any question? Please read
+                <a
+                  href="#"
+                  class="text-decoration-none"
+                  data-bs-toggle="modal"
+                  data-bs-target="#tnc"
+                  >terms and conditions</a
+                >
+              </div>
+              <div class="d-flex justify-content-end align-items-center">
+                <button
+                  id="login"
+                  type="button"
+                  class="btn btn-outline-primary border-0 rounded-5 px-4 py-2 me-3"
+                >
+                  Login
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary rounded-5 px-4 py-2"
+                >
+                  Verify
+                </button>
+              </div>
+            </form>
+            <form
+              class="carousel-item p-1"
+              id="register-form"
+            >
+              <div class="form-floating">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-control"
+                  placeholder="example@email.com"
+                  required
+                />
+                <label for="email">Email</label>
+
+                <div class="invalid-feedback">
+                  Please provide a valid email.
+                </div>
+              </div>
+              <div class="form-floating">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="form-control"
+                  placeholder=""
+                  required
+                  minlength="6"
+                />
+                <label for="password">Password</label>
+                <div class="invalid-feedback">
+                  Password must be at least 6 characters long and must not be
+                  empty.
+                </div>
+              </div>
+              <div class="form-floating">
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  class="form-control"
+                  placeholder=""
+                  required
+                />
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="invalid-feedback">Passwords must match.</div>
+              </div>
+              <div class="d-flex align-items-center mb-3">
+                <hr class="flex-grow-1" />
+                <span class="mx-2 text-muted">OR</span>
+                <hr class="flex-grow-1" />
+              </div>
+
+              <button
+                type="button"
+                id="google-signin"
+                class="btn btn-light shadow-sm border fs-6 w-100 py-3 mb-3 text-start d-flex justify-content-center mb-5"
+              >
+                <img
+                  src="<%= require('../assets/google.svg') %>"
+                  height="24"
+                  class="me-2 w-auto"
+                />
+                <div>Sign in with Google</div>
+              </button>
+
+              <!-- <div class="mb-5">
+                Have any question? Please read
+                <a
+                  href="#"
+                  class="text-decoration-none"
+                  data-bs-toggle="modal"
+                  data-bs-target="#tnc"
+                  >terms and conditions</a
+                >
+              </div> -->
+              <div class="d-flex justify-content-end align-items-center">
+                <button
+                  type="button"
+                  data-bs-target="#form-carousel"
+                  data-bs-slide="prev"
+                  class="btn btn-outline-primary border-0 rounded-5 px-4 py-2 me-3"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary rounded-5 px-4 py-2"
+                >
+                  Verify
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-    <form
-      class="needs-validation"
-      novalidate
-    >
-      <!-- Email Field -->
-      <div class="form-floating">
-        <input
-          type="email"
-          id="email"
-          name="email"
-          class="form-control"
-          placeholder="example@email.com"
-          required
-        />
-        <label for="email">Email</label>
+  </div>
 
-        <div class="invalid-feedback">Please provide a valid email.</div>
-      </div>
-      <!-- Password Field -->
-      <div class="form-floating">
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="form-control"
-          placeholder=""
-          required
-          minlength="6"
-        />
-        <label for="password">Password</label>
-        <div class="invalid-feedback">
-          Password must be at least 6 characters long and must not be empty.
-        </div>
-      </div>
-      <!-- Confirm Password Field -->
-      <div class="form-floating">
-        <input
-          type="password"
-          id="confirmPassword"
-          class="form-control"
-          placeholder=""
-          required
-        />
-        <label for="confirmPassword">Confirm Password</label>
-        <div class="invalid-feedback">Passwords must match.</div>
-      </div>
-      <!-- Token Field -->
-      <div class="form-floating">
-        <input
-          type="password"
-          id="token"
-          name="token"
-          class="form-control"
-          placeholder=""
-          required
-        />
-        <label
-          for="token"
-          class="form-label"
-          >Token</label
-        >
-        <div class="invalid-feedback">Please provide a valid token.</div>
-      </div>
-      <!-- Terms and Conditions -->
-      <div class="d-flex align-items-center">
-        <div class="form-check">
-          <input
-            class="form-check-input box-shadow-primary"
-            type="checkbox"
-            id="terms"
-            required
-          />
-          <label
-            class="form-check-label small"
-            for="terms"
-            >I agree to the
-            <a
-              href="#"
-              data-bs-toggle="modal"
-              data-bs-target="#tnc"
-              >terms and conditions</a
-            >
-          </label>
-          <div class="invalid-feedback">You must agree before submitting.</div>
-        </div>
-        <button
-          type="submit"
-          class="btn btn-primary mb-2 ms-auto text-uppercase"
-        >
-          Sign Up
-        </button>
-      </div>
-    </form>
-  </div>
-  <div class="d-flex justify-content-center align-items-baseline mt-2">
-    <span class="text-muted me-1">Already have an account?</span>
-    <span
-      id="login"
-      role="button"
-      class="fw-medium link-primary text-decoration-underline"
-      >Sign In</span
-    >
-  </div>
   <div
     class="modal fade modal-lg"
     id="tnc"
@@ -137,9 +209,9 @@
           <button
             type="button"
             data-bs-dismiss="modal"
-            class="btn btn-primary ms-auto d-flex justify-content-center align-content-center rounded-circle p-2"
+            class="btn ms-auto d-flex justify-content-center align-content-center"
           >
-            <i class="bx bx-x"></i>
+            <i class="bi bi-x-lg"></i>
           </button>
         </div>
         <div

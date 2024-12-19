@@ -194,3 +194,38 @@ $header-height: 72px;
 .user-reply * {
   text-wrap: auto;
 }
+
+.dt-layout-table:has(#item-table) {
+  margin-block: 1rem !important;
+  background-color: var(--bs-white);
+  min-height: 500px;
+}
+
+#item-table_wrapper {
+  .dt-search {
+    display: none;
+  }
+
+  * {
+    text-align: start !important;
+  }
+}
+
+#searchbox::placeholder {
+  font-family: "bootstrap-icons", Arial, sans-serif; /* Font for the icon */
+  font-size: 16px; /* Adjust size of the placeholder text and icon */
+  line-height: 1.5; /* Ensure proper line height */
+}
+
+.chart-icon {
+  height: 16.4px;
+  width: 16px;
+  display: inline-block;
+  content: "";
+
+  svg {
+    height: 100% !important;
+    width: 100% !important;
+    stroke-width: 6;
+  }
+}

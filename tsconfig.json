@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es6", // Choose your ECMAScript version
+    "module": "esnext", // Use modern JavaScript modules
+    "moduleResolution": "node", // Use Node.js module resolution strategy
+    "strict": true, // Enable strict type-checking options
+    "esModuleInterop": true, // Allow importing CommonJS modules in ES module style
+    "skipLibCheck": true, // Skip type checking for declaration files
+    "outDir": "./dist", // Output directory for compiled JS files
+    "sourceMap": true, // Enable source maps for debugging
+    "allowJs": true, // Allow JavaScript files to be included in the build (for gradual migration)
+    // "checkJs": true,
+    "experimentalDecorators": true
+  },
+  "include": [
+    "src/js/*"
+  ], // Folder where your TS/JS files are
+  "exclude": [
+    "node_modules",
+    "dist"
+  ], // Exclude node_modules folder
+}

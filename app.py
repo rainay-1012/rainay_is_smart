@@ -1,218 +1,155 @@
 import io
-import logging
 import os
 from datetime import datetime, timedelta
-from functools import wraps
 from typing import Optional
 
-import bleach
-import firebase_admin
 import jwt
 import pandas as pd
 from dotenv import load_dotenv
-from firebase_admin import auth, credentials, storage
-from firebase_admin.auth import EmailAlreadyExistsError, UserNotFoundError, UserRecord
+from firebase_admin import auth
+from firebase_admin._user_mgt import UserRecord
 from flask import (
     Flask,
     Response,
     abort,
     g,
+    json,
     jsonify,
     redirect,
+    render_template,
     request,
-    send_file,
     url_for,
 )
-from flask.templating import render_template
-from flask_mail import Mail, Message
+from flask.helpers import send_file
+from flask_mail import Message
 from google.cloud.exceptions import GoogleCloudError
-from openai import OpenAI
-from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.datastructures.file_storage import FileStorage
 from werkzeug.exceptions import HTTPException
 
-from database import Company, Package, Position, Token, User, db, init_db
-
-app = Flask(__name__, template_folder="dist", static_folder="dist/static")
+from database import (
+    TABLES_METADATA,
+    Category,
+    Company,
+    Item,
+    Package,
+    Position,
+    Token,
+    User,
+    Vendor,
+    db,
+    init_db,
+)
+from utils import (
+    ResourceNotFoundException,
+    UserNotFoundException,
+    check_token,
+    get_bearer_token,
+    init_logger,
+    init_mail,
+    mail,
+    on_ajax_render,
+    openai_response,
+    remove_photo,
+    require_fields,
+    upload_photo,
+)
 
 load_dotenv()
-production = os.environ["PRODUCTION"] == "1"
-app.config["SERVER_NAME"] = (
-    os.environ["PROD_SERVER_NAME"] if production else "localhost:5000"
-)
-app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
-app.config["MAIL_SERVER"] = os.environ["MAIL_SERVER"]
-app.config["MAIL_PORT"] = int(os.environ["MAIL_PORT"])
-app.config["MAIL_USERNAME"] = os.environ["MAIL_USERNAME"]
-app.config["MAIL_PASSWORD"] = os.environ["MAIL_PASSWORD"]
-app.config["MAIL_USE_TLS"] = os.environ["MAIL_USE_TLS"] == "True"
-app.config["MAIL_USE_SSL"] = os.environ["MAIL_USE_SSL"] == "True"
-app.config["MAIL_DEFAULT_SENDER"] = os.environ["MAIL_DEFAULT_SENDER"]
-app.config["MAIL_SUPPRESS_SEND"] = not production
-mail = Mail(app)
 
+app = Flask(__name__, template_folder="dist", static_folder="dist/static")
+init_logger(app)
+init_mail(app)
 init_db(app)
 
-cred = credentials.Certificate(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
-firebase_admin.initialize_app(cred, {"storageBucket": os.environ["STORAGE_URL"]})
-client = OpenAI()
 
-bucket = storage.bucket()
+app.config["SERVER_NAME"] = (
+    os.environ["PROD_SERVER_NAME"]
+    if os.environ["PRODUCTION"] == "1"
+    else "localhost:5000"
+)
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 
 
-@app.errorhandler(Exception)  # type: ignore
-def handle_exception(e):
-    # Default error details
-    code = 500
-    description = dict(
-        title="Internal Server Error",
-        body="An unexpected error occurred. Please try again later.",
+@app.errorhandler(ResourceNotFoundException)
+def handle_resource_not_found(e):
+    app.logger.exception(f"{e.name} not found: {e.message}")
+
+    return jsonify(
+        {
+            "code": e.status_code,
+            "name": e.name,
+            "message": e.message,
+            "content": render_template(
+                "error.html",
+                error_start=str(e.status_code)[0],
+                error_end=str(e.status_code)[2],
+                error_title=f"{e.name} Not Found",
+                error_description=e.message,
+                redirect_url=url_for("index", _external=True),
+            ),
+        }
+    ), e.status_code
+
+
+@app.errorhandler(HTTPException)
+def handle_http_exception(e):
+    app.logger.exception(e)
+    code = e.code
+    description = (
+        e.description
+        if isinstance(e.description, dict)
+        else {
+            "name": "Page Not Found",
+            "message": e.description
+            if isinstance(e.description, str)
+            else "An HTTP error occurred.",
+        }
     )
-    print(e)
-    if isinstance(e, HTTPException):
-        code = e.code
-        description: dict = e.description  # type: ignore
 
-    html_content = render_template(
+    return render_template(
         "error.html",
         error_start=str(code)[0],
         error_end=str(code)[2],
-        error_title=description["title"],
-        error_description=description["body"],
-        redirect_url=url_for("index", _external=True),
-    )
-    return (
-        jsonify(
-            {
-                "status": "error",
-                "code": code,
-                "description": description,
-                "content": html_content,
-            }
-        ),
-        code,
-    )
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template(
-        "error.html",
-        error_start=4,
-        error_end=4,
-        error_title="Page Not Found",
-        error_description="The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+        error_title=description.get("name"),
+        error_description=description.get("message"),
         style=True,
         redirect_url=url_for("index", _external=True),
-    )
+    ), e.code
 
 
-def check_token(required_role: Optional[Position] = None):
-    def decorator(f):
-        @wraps(f)
-        def wrap(*args, **kwargs):
-            auth_header = request.headers.get("Authorization")
-
-            if not auth_header or not auth_header.startswith("Bearer "):
-                return index(request.path)
-
-            token = auth_header.split(" ", 1)[1]
-
-            try:
-                user = auth.verify_id_token(token)
-            except Exception as e:
-                logging.error(f"Error verifying token: {e}")
-                abort(
-                    403,
-                    {
-                        "title": "Access Denied",
-                        "body": "Your session could not be authenticated. Please log in again to continue.",
-                    },
-                )
-            else:
-                g.user = user
-                print(g.user)
-                if required_role:
-                    if required_role == Position.admin:
-                        if not user.get("admin"):
-                            abort(
-                                403,
-                                description=f"User must have the '{required_role}' role.",
-                            )
-                    else:
-                        uid = user["uid"]
-                        user_data = db.session.get(User, uid)
-                        if not user_data:
-                            abort(404, "User not found.")
-
-                        if user_data.token.position != required_role:
-                            abort(
-                                403,
-                                description=f"User must have the '{required_role}' role.",
-                            )
-
-                return f(*args, **kwargs)
-
-        return wrap
-
-    return decorator
+@app.errorhandler(SQLAlchemyError)
+def handle_database_exception(e):
+    db.session.rollback()
+    app.logger.exception(f"Database error occurred: {str(e)}")
+    return handle_generic_exception(e, log=False)
 
 
-def require_fields(required_fields, source_type="json"):
-    def decorator(f):
-        @wraps(f)
-        def wrap(*args, **kwargs):
-            # Retrieve data based on the source_type
-            if source_type == "json":
-                data = request.get_json() or {}
-            elif source_type == "form":
-                data = request.form
-            elif source_type == "args":
-                data = request.args
-            else:
-                return jsonify({"message": f"Invalid source type: {source_type}"}), 400
+@app.errorhandler(Exception)
+def handle_generic_exception(e, log=True):
+    if log:
+        app.logger.exception(f"Unexpected error occurred: {str(e)}")
+    code = 500
+    description = {
+        "name": "Internal Server Error",
+        "message": "An unexpected error occurred. Please try again later.",
+    }
 
-            # Check for missing fields
-            missing_fields = [field for field in required_fields if field not in data]
-
-            if missing_fields:
-                return (
-                    jsonify(
-                        {"message": f"Missing field(s): {', '.join(missing_fields)}"}
-                    ),
-                    400,
-                )
-
-            sanitized_data = {}
-            for key, value in data.items():
-                sanitized_data[key] = bleach.clean(value, strip=True)
-
-            kwargs['data'] = sanitized_data
-            return f(*args, **kwargs)
-
-        return wrap
-
-    return decorator
-
-
-def on_ajax_render(template_name):
-    def decorator(f):
-        @wraps(f)
-        def wrapped_function(*args, **kwargs):
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                print(template_name)
-                return render_template(template_name)
-            return f(*args, **kwargs)
-
-        return wrapped_function
-
-    return decorator
+    return render_template(
+        "error.html",
+        error_start=str(code)[0],
+        error_end=str(code)[2],
+        error_title=description.get("name"),
+        error_description=description.get("message"),
+        style=True,
+        redirect_url=url_for("index", _external=True),
+    ), code
 
 
 @app.route("/")
-def index(route="/login"):
-    return render_template("index.html", redirect_url=route)
+@on_ajax_render("index.html")
+def index():
+    return render_template("index.html")
 
 
 @app.route("/login")
@@ -224,33 +161,35 @@ def login():
 @app.route("/login_redirect", methods=["POST"])
 @check_token()
 def login_redirect():
-    try:
-        uid = g.user["uid"]
+    uid = g.user["uid"]
 
-        f_user: UserRecord = auth.get_user(uid)
+    user = db.session.get(User, uid)
 
-        if f_user.custom_claims and f_user.custom_claims.get("admin"):
-            position = Position.admin
-        else:
-            user = db.session.get(User, uid)
-            print(uid)
-            if user is None:
-                abort(404, description="User not found")
+    if user is None:
+        raise UserNotFoundException()
 
-            position = user.token.position
+    position = user.token.position
 
-        if position == Position.manager:
-            return jsonify({"redirect_to": url_for("manager_dashboard")})
-        elif position == Position.executive:
-            return jsonify({"redirect_to": url_for("executive_dashboard")})
-        elif position == Position.admin:
-            return jsonify({"redirect_to": url_for("developer_dashboard")})
+    if position == Position.manager or position == Position.executive:
+        return jsonify(
+            {
+                "success": True,
+                "message": "Redirecting to dashboard",
+                "redirect": url_for("dashboard"),
+            }
+        )
+    if position == Position.admin:
+        return jsonify(
+            {
+                "success": True,
+                "message": "Redirecting to developer dashboard",
+                "redirect": url_for("developer_dashboard"),
+            }
+        )
 
-        return jsonify({"error": "Invalid email."}), 400
-
-    except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred."}), 500
+    raise ResourceNotFoundException(
+        name="Position", message="Invalid position assigned to the user."
+    )
 
 
 @app.route("/register")
@@ -259,42 +198,81 @@ def register():
     return render_template("index.html", redirect_url="/register")
 
 
-@app.route("/is_email_verified")
-def is_email_verified():
-    email = request.args["email"]
-    return {"verified": auth.get_user_by_email(email).email_verified}, 200
+@app.route("/verify_token")
+def verify_token():
+    token_id = get_bearer_token(request)
+    token = db.session.get(Token, token_id)
+
+    if not token or token.user:
+        return (
+            jsonify(
+                {
+                    "name": "auth/invalid-token",
+                    "message": "The provided token is invalid.",
+                },
+            ),
+            400,
+        )
+
+    return (
+        jsonify({"name": "Valid token", "message": "Token is verified and valid"}),
+        201,
+    )
 
 
 @app.route("/create_user", methods=["POST"])
-@require_fields(["email", "password", "token"])
+@require_fields(["token"])
 def create_user(data):
     try:
-        email = data["email"]
-        password = data["password"]
         token_id = data["token"]
-
         token = db.session.get(Token, token_id)
 
-        if not token:
+        if not token or token.user:
+            raise ResourceNotFoundException(
+                name="Token", message="Require valid token from registered company"
+            )
+
+        data = request.get_json()
+        id_token = data.get("id_token")
+
+        if id_token:
+            decoded_token = auth.verify_id_token(id_token)
+            user = auth.get_user(decoded_token["uid"])
+            auth.update_user(user.uid, email_verified=True)
+
+            db_user = User(id=decoded_token["uid"], token_id=token_id)
+            db.session.add(db_user)
+            db.session.commit()
+            app.logger.info(f"User created with ID: {user.uid}")
             return (
                 jsonify(
-                    {
-                        "code": "auth/invalid-token",
-                        "message": "The provided token is invalid.",
-                    }
+                    {"message": "User created successfully", "name": "success register"}
                 ),
-                400,
+                201,
+            )
+
+        email = data.get("email")
+        password = data.get("password")
+
+        if not (email and password):
+            raise ValueError(
+                {
+                    "name": "Missing required fields",
+                    "message": "Required email and password/ user id token",
+                }
             )
 
         try:
             user = auth.get_user_by_email(email)
             if not user.email_verified:
                 auth.delete_user(user.uid)
-        except UserNotFoundError:
+        except auth.UserNotFoundError:
             pass
 
         user: UserRecord = auth.create_user(
-            email=email, password=password, email_verified=False
+            email=email,
+            password=password,
+            email_verified=False,
         )
 
         signed_token = jwt.encode(
@@ -307,7 +285,7 @@ def create_user(data):
             algorithm="HS256",
         )
 
-        logging.info(f"User created with ID: {user.uid}")
+        app.logger.info(f"User created with ID: {user.uid}")
 
         link = url_for("verify_email", token=signed_token, _external=True)
         app.logger.info(link)
@@ -321,6 +299,7 @@ def create_user(data):
                 verify_link=link,
             ),
         )
+
         mail.send(msg)
 
         return (
@@ -328,18 +307,147 @@ def create_user(data):
             201,
         )
 
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        logging.error(f"Database error: {str(e)}")
-        return jsonify({"error": "Database error"}), 500
-
-    except EmailAlreadyExistsError:
-        logging.error(f"{email} is already in use.")
+    except auth.EmailAlreadyExistsError:
+        app.logger.exception(f"{email} is already in use.")
         return jsonify({"error": "Email already in use"}), 400
 
+
+@app.route("/get_user_role")
+@check_token()
+def get_user_role():
+    if g.user.get("role"):
+        role = g.user["role"]
+    else:
+        user = db.session.get(User, g.user["uid"])
+
+        if user is None:
+            app.logger.error(f"User not found with UID: {g.user['uid']}")
+            role = None
+        else:
+            role = user.token.user if user.token else None
+
+    if not role:
+        return jsonify({"error": "Role not found"}), 404
+
+    return jsonify({"role": role}), 200
+
+
+@app.route("/get_user_info")
+@check_token()
+def get_user_info():
+    try:
+        user_id = g.user["uid"]
+        user_record: UserRecord = auth.get_user(user_id)
+        user = db.session.get(User, user_id)
+
+        if not user:
+            return jsonify({"error": "No user is specified"}), 400
+
+        return (
+            jsonify(
+                {
+                    "user": {
+                        "id": user_id,
+                        "name": user.fullname,
+                        "username": user_record.display_name,
+                        "photo": user_record.photo_url,
+                        "phoneNo": user_record.phone_number,
+                        "date": user.join_date,
+                        "email": user_record.email,
+                        "position": user.token.position.name,
+                        "company": user.token.company.name,
+                    },
+                },
+            ),
+            201,
+        )
+
+    except (ValueError, auth.UserNotFoundError) as e:
+        app.logger.exception(
+            f"The specified user ID {user_id} or properties are invalid. Detail: {e}",
+        )
+        return jsonify({"error": "Invalid specified user ID."}), 400
+
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
+        app.logger.exception(f"An error occurred: {e!s}")
         return jsonify({"error": "An unexpected error occurred."}), 500
+
+
+@app.route("/update_user", methods=["POST"])
+@check_token()
+def update_user():
+    try:
+        user_id = g.user["uid"]
+        user = db.session.get(User, user_id)
+        user_record: UserRecord = auth.get_user(user_id)
+
+        if not user:
+            return jsonify({"error": "No user is specified"}), 400
+
+        photo: Optional[FileStorage] = request.files.get("file")
+
+        if photo and photo.filename:
+            remove_photo(user_record.photo_url)
+            photo_url = upload_photo(photo, user_id)
+            auth.update_user(
+                uid=user_id,
+                photo_url=photo_url,
+            )
+            return (
+                jsonify(
+                    {
+                        "message": "User photo successfully updated.",
+                        "photo": photo_url,
+                    }
+                ),
+                201,
+            )
+        else:
+            app.logger.debug(request.form)
+            name = request.form.get("name")
+            phone_number = request.form.get("phoneNo")
+            username = request.form.get("username")
+            if not (name and username and phone_number):
+                return jsonify(
+                    {"error": "All fields (name, username, phoneNo) are required."}
+                ), 400
+
+            auth.update_user(
+                uid=user_id,
+                display_name=username,
+                phone_number=phone_number,
+            )
+            user.fullname = name
+            db.session.commit()
+            return (
+                jsonify(
+                    {
+                        "message": "User successfully updated.",
+                        "user_id": user_id,
+                    }
+                ),
+                201,
+            )
+
+    except GoogleCloudError as e:
+        app.logger.exception(f"Google cloud error: {e}")
+        return jsonify({"error": "An error occurred while uploading the file."}), 500
+
+    except (ValueError, auth.UserNotFoundError) as e:
+        app.logger.exception(
+            f"The specified user ID {user_id} or properties are invalid. Detail: {e}",
+        )
+        return jsonify({"error": "Invalid specified user ID."}), 400
+
+    except Exception as e:
+        app.logger.exception(f"An error occurred: {e!s}")
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
+
+@app.route("/is_email_verified")
+def is_email_verified():
+    email = request.args["email"]
+    return {"verified": auth.get_user_by_email(email).email_verified}, 200
 
 
 @app.route("/verify_email")
@@ -348,39 +456,69 @@ def verify_email(data):
     try:
         token = data["token"]
         decoded_token = jwt.decode(
-            token, app.config["SECRET_KEY"], algorithms=["HS256"]
+            token,
+            app.config["SECRET_KEY"],
+            algorithms=["HS256"],
         )
 
-        auth.get_user(decoded_token["uid"])
+        user = auth.get_user(decoded_token["uid"])
+        auth.update_user(user.uid, email_verified=True)
 
         db_user = User(id=decoded_token["uid"], token_id=decoded_token["token"])  # type: ignore
         db.session.add(db_user)
         db.session.commit()
 
         return redirect(url_for("email_verified"))
-    
-    except UserNotFoundError:
-        return page_not_found(None)
+
+    except auth.UserNotFoundError:
+        abort(
+            403,
+            description={
+                "title": "Email No Longer Exists",
+                "body": "The email is either expired or check your inbox for the latest verification email.",
+            },
+        )
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logging.error(f"Database error: {str(e)}")
-        return jsonify({"error": "Database error"}), 500
+        app.logger.exception(f"Database error: {e!s}")
+        abort(
+            500,
+            description={
+                "title": "Something Went Wrong",
+                "body": "We encountered an issue while processing your request. Please try again later.",
+            },
+        )
 
-    except jwt.ExpiredSignatureError:
-        return jsonify({"error": "Token has expired"}), 400
-
-    except jwt.InvalidTokenError:
-        return jsonify({"error": "Invalid token"}), 400
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        abort(
+            400,
+            description={
+                "title": "Token Expired or Invalid",
+                "body": "The token is either expired or invalid. Please request a new verification email.",
+            },
+        )
 
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred."}), 500
+        app.logger.exception(f"An unexpected error occurred: {e!s}")
+        abort(
+            500,
+            description={
+                "title": "Unexpected Error",
+                "body": "An unexpected error occurred. Please try again later.",
+            },
+        )
 
 
 @app.route("/email_verified")
 def email_verified():
     return render_template("email_verified.html")
+
+
+@app.route("/developer_dashboard")
+@on_ajax_render("dev_dashboard.html")
+def developer_dashboard():
+    return render_template("index.html", redirect_url=url_for("developer_dashboard"))
 
 
 @app.route("/create_company", methods=["POST"])
@@ -397,17 +535,26 @@ def create_company(data):
 
         package = Package[package]
 
-        company = Company(name=name, address=address, email=email, package=package)  # type: ignore
+        company = Company(name=name, address=address, email=email, package=package)
         db.session.add(company)
         db.session.commit()
 
         m_token_count, e_token_count = package.value
-        m_tokens = [Token(position=Position.manager, company_id=company.id) for _ in range(m_token_count)]  # type: ignore
-        e_tokens = [Token(position=Position.executive, company_id=company.id) for _ in range(e_token_count)]  # type: ignore
+        m_tokens = [
+            Token(position=Position.manager, company_id=company.id)
+            for _ in range(m_token_count)
+        ]  # type: ignore
+        e_tokens = [
+            Token(position=Position.executive, company_id=company.id)
+            for _ in range(e_token_count)
+        ]  # type: ignore
 
         db.session.add_all(m_tokens)
         db.session.add_all(e_tokens)
         db.session.commit()
+
+        download_token_url = url_for("download_token", id=company.id, _external=True)
+        print(f"Download token url: {download_token_url}")
 
         msg = Message(
             "Vendosync: Thank you for purchasing the package.",
@@ -419,7 +566,7 @@ def create_company(data):
                 price=0.0,
                 date=company.join_date,
                 randomness=datetime.now(),
-                token_link=url_for("download_token", id=company.id, _external=True),
+                token_link=download_token_url,
             ),
         )
         mail.send(msg)
@@ -429,27 +576,26 @@ def create_company(data):
                 {
                     "message": "Company created successfully",
                     "company_name": company.name,
-                }
+                },
             ),
             201,
         )
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logging.error(f"Database error occurred: {str(e)}")
+        app.logger.exception(f"Database error occurred: {e!s}")
         return jsonify({"error": "Database error occurred."}), 500
 
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
+        app.logger.exception(f"An error occurred: {e!s}")
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
 @app.route("/get_company_data", methods=["GET"])
 @check_token(Position.admin)
 def get_company_data():
-    companies = Company.query.all()
+    companies = db.session.query(Company).filter(Company.id != "test").all()
 
-    # Prepare the response data
     data = [
         {
             "id": company.id,
@@ -467,7 +613,7 @@ def get_company_data():
 @app.route("/get_token_data", methods=["GET"])
 @check_token(Position.admin)
 def get_token_data():
-    tokens = Token.query.all()
+    tokens = db.session.query(Token).join(Company).filter(Company.id != "test").all()
     data = [
         {
             "id": token.id,
@@ -499,141 +645,427 @@ def download_token(data):
     csv_buffer.seek(0)
 
     return send_file(
-        csv_buffer, as_attachment=True, download_name=f"tokens.csv", mimetype="text/csv"
+        csv_buffer,
+        as_attachment=True,
+        download_name="tokens.csv",
+        mimetype="text/csv",
     )
 
 
-@app.route("/manager_dashboard")
-@check_token(Position.manager)
-@on_ajax_render("mgr_dashboard.html")
-def manager_dashboard():
-    return render_template("index.html", redirect_url="/manager_dashboard")
+@app.route("/dashboard")
+@on_ajax_render("dashboard.html")
+def dashboard():
+    return render_template("index.html", redirect_url="/dashboard")
 
 
-@app.route("/manager_dashboard/vendor_management")
-@check_token(Position.manager)
-@on_ajax_render("vendor_management.html")
-def manager_dashboard_vendor():
-    return render_template("index.html", redirect_url="/manager_dashboard/vendor_management")
+@app.route("/dashboard/procurement")
+@on_ajax_render("procurement.html")
+def procurement():
+    return render_template("index.html", redirect_url="/dashboard/procurement")
 
-@app.route("/manager_dashboard/profile")
-@check_token(Position.manager)
+
+@app.route("/dashboard/profile")
 @on_ajax_render("profile.html")
-def manager_dashboard_profile():
-    return render_template("index.html", redirect_url="/manager_dashboard/profile")
+def profile():
+    return render_template("index.html", redirect_url="/dashboard/profile")
 
 
-@app.route("/executive_dashboard")
+@app.route("/dashboard/item")
+@on_ajax_render("item.html")
+def item():
+    return render_template("index.html", redirect_url="/dashboard/item")
+
+
+@app.route("/dashboard/vendor")
+@on_ajax_render("vendor.html")
+def vendor():
+    return render_template("index.html", redirect_url="/dashboard/vendor")
+
+
+@app.route("/dashboard/purchase")
+@on_ajax_render("purchase.html")
+def purchase():
+    return render_template("purchase.html", redirect_url="/dashboard/purchase")
+
+
+# user
+@app.route("/get_user_data", methods=["GET"])
 @check_token(Position.executive)
-@on_ajax_render("exec_dashboard.html")
-def executive_dashboard():
-    return render_template("index.html", redirect_url="/executive_dashboard")
+def get_user_data():
+    users = User.query.filter(User.id != "test").all()
 
+    data = []
 
+    for user in users:
+        user_record: UserRecord = auth.get_user(user.id)
 
-@app.route("/developer_dashboard")
-@check_token(Position.admin)
-@on_ajax_render("dev_dashboard.html")
-def developer_dashboard():
-    return render_template("index.html", redirect_url="/developer_dashboard")
-
-
-@app.route("/get_user_info")
-def get_user_info():
-    try:
-        user_id = g.user["uid"]
-        user_record: UserRecord = auth.get_user(user_id)
-
-        return (
-            jsonify(
-                {
-                    "user": {
-                        "username": user_record.display_name,
-                        "photo_url": user_record.photo_url,
-                        "photoNo": user_record.phone_number,
-                    }
-                }
-            ),
-            201,
+        data.append(
+            {
+                "id": user.id,
+                "name": user.fullname,
+                "username": user_record.display_name,
+                "photo": user_record.photo_url,
+                "phoneNo": user_record.phone_number,
+                "date": user.join_date,
+                "email": user_record.email,
+                "position": user.token.position.name,
+                "company": user.token.company.name,
+            },
         )
 
-    except (ValueError, UserNotFoundError) as e:
-        logging.error(
-            f"The specified user ID {user_id} or properties are invalid. Detail: {e}"
-        )
-        return jsonify({"error": "Invalid specified user ID."}), 400
+    app.logger.debug(data)
 
-    except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred."}), 500
-
-
-@app.route("/update_user", methods=["POST"])
-def update_user():
-    try:
-        user_id = g.user["uid"]
-
-        if not user_id:
-            return jsonify({"error": "No user is specified"}), 400
-
-        photo: Optional[FileStorage] = request.files.get("file")
-        if photo and photo.filename:
-            photo_url = upload_photo(photo, user_id)
-
-        auth.update_user(
-            uid=user_id,
-            display_name=request.form.get("user_name"),
-            photo_number=request.form.get("phoneNo"),
-            photo_url=photo_url,
-        )
-        logging.info(f"User {user_id} is successfully updated.")
-
-        return (
-            jsonify({"message": "User successfully updated.", "user_id": user_id}),
-            201,
-        )
-
-    except GoogleCloudError as e:
-        logging.error(f"Google cloud error: {e}")
-        return jsonify({"error": "An error occurred while uploading the file."}), 500
-
-    except (ValueError, UserNotFoundError) as e:
-        logging.error(
-            f"The specified user ID {user_id} or properties are invalid. Detail: {e}"
-        )
-        return jsonify({"error": f"Invalid specified user ID."}), 400
-
-    except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred."}), 500
-
-
-def upload_photo(photo, user_id):
-    extension = Image.open(photo).format
-
-    if not extension:
-        return jsonify({"error": "Unrecognized image file extension"}), 400
-
-    filename = f"{hash([user_id, photo.filename])}.{extension.lower()}"
-    blob = bucket.blob(blob_name=filename)
-    blob.upload_from_file(photo.stream, content_type=photo.content_type)
-    blob.make_public()
-    return blob.public_url
-
-
-def openai_streaming(query):
-    stream = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[    {"role": "system", "content": "You are a helpful assistant. Please structure your response using Markdown with headings, paragraphs, and bullet points where appropriate."},
-        {
-            "role": "user",
-            "content": query
-        }],
-        stream=True,
+    return (
+        jsonify(data),
+        201,
     )
-    for chunk in stream:
-        if chunk.choices[0].delta.content is not None:
-            yield chunk.choices[0].delta.content
+
+
+@app.route("/delete_user/<user_id>", methods=["DELETE"])
+@check_token(Position.executive)
+def delete_user(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    remove_photo(user.photo)
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error deleting user", "error": str(e)}), 500
+
+
+@app.route("/upsert_user", methods=["POST"])
+@check_token(Position.executive)
+@require_fields(["id", "name", "username", "email", "phoneNo"], source_type="form")
+def upsert_user(data):
+    try:
+        current_user = db.session.get(User, g.user["uid"])
+        if not current_user:
+            return jsonify({"message": "User not found"}), 404
+
+        user_id = data.get("id")
+        name = data.get("name")
+        username = data.get("username")
+        email = data.get("email")
+        phone_no = data.get("phoneNo")
+
+        # Ensure the user ID exists
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Update user details
+        user.name = name
+        user.username = username
+        user.email = email
+        user.phone_no = phone_no
+
+        db.session.commit()
+
+        # Handle photo upload
+        photo_file = request.files.get("photo")
+        if photo_file:
+            remove_photo(user.photo)  # Remove the old photo
+            photo_path = upload_photo(photo_file, user.id)  # Upload the new photo
+            user.photo = photo_path
+            db.session.commit()
+
+        return jsonify({"message": "User updated successfully!"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(e)
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route("/get_item_data", methods=["GET"])
+@check_token(Position.executive)
+def get_item_data():
+    user = db.session.get(User, g.user["uid"])
+
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    company_id = user.token.company_id
+    items = Item.query.filter_by(company_id=company_id).all()
+
+    data = [
+        {
+            "id": item.id,
+            "name": item.name,
+            "photo": item.photo,
+            "last_update": item.last_update,
+            "categories": [category.name for category in item.categories],
+        }
+        for item in items
+    ]
+    return jsonify({"data": data})
+
+
+@app.route("/delete_item/<item_id>", methods=["DELETE"])
+@check_token(Position.executive)
+def delete_item(item_id):
+    item = db.session.get(Item, item_id)
+
+    if not item:
+        return jsonify({"message": "Item not found"}), 404
+
+    remove_photo(item.photo)
+
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({"message": "Item deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error deleting item", "error": str(e)}), 500
+
+
+@app.route("/upsert_item", methods=["POST"])
+@check_token(Position.executive)
+@require_fields(["id", "name", "categories"], source_type="form")
+def upsert_item(data):
+    try:
+        user = db.session.get(User, g.user["uid"])
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        company_id = user.token.company_id
+        item_id = data["id"]
+        name = data["name"]
+        categories = data["categories"]
+        categories = json.loads(categories) if categories else []
+
+        category_objs = []
+        for category_name in categories:
+            category = Category.query.filter_by(name=category_name).first()
+            if not category:
+                category = Category(
+                    name=category_name,
+                    company_id=company_id,
+                )
+                db.session.add(category)
+            category_objs.append(category)
+
+        if item_id:
+            item = Item.query.get(item_id)
+            if not item:
+                return jsonify({"error": "Item not found"}), 404
+
+            remove_photo(item.photo)
+            item.name = name
+            item.last_update = datetime.utcnow()
+            item.categories = category_objs
+        else:
+            item = Item(
+                name=name,
+                categories=category_objs,
+                company_id=company_id,
+            )
+            db.session.add(item)
+
+        db.session.commit()
+
+        photo_file = request.files.get("photo")
+        if photo_file:
+            photo_path = upload_photo(photo_file, item.id)
+            item.photo = photo_path
+            db.session.commit()
+
+        return jsonify({"message": "Item managed successfully!"}), (
+            201 if not item_id else 200
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(e)
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route("/get_vendor_data", methods=["GET"])
+@check_token(Position.executive)
+def get_vendor_data():
+    user = db.session.get(User, g.user["uid"])
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    company_id = user.token.company_id if user.token else None
+    if not company_id:
+        return jsonify({"message": "User does not belong to a company"}), 400
+
+    vendors = Vendor.query.filter_by(company_id=company_id).all()
+
+    data = [
+        {
+            "id": vendor.id,
+            "name": vendor.name,
+            "categories": [category.name for category in vendor.categories],
+            "email": vendor.email,
+            "address": vendor.address,
+            "gred": vendor.gred,
+            "approved": vendor.approved,
+        }
+        for vendor in vendors
+    ]
+    return jsonify({"data": data})
+
+
+@app.route("/upsert_vendor", methods=["POST"])
+@check_token(Position.executive)
+@require_fields(["id", "name", "categories", "email", "address"], source_type="form")
+def upsert_vendor(data):
+    try:
+        user = db.session.get(User, g.user["uid"])
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        company_id = user.token.company_id
+        vendor_id = data.get("id")
+        name = data.get("name")
+        categories = json.loads(data.get("categories", "[]"))
+        email = data.get("email")
+        address = data.get("address")
+
+        category_objs = []
+        for category_name in categories:
+            category = Category.query.filter_by(name=category_name).first()
+            if not category:
+                category = Category(name=category_name, company_id=company_id)
+                db.session.add(category)
+            category_objs.append(category)
+
+        if vendor_id:
+            vendor = db.session.get(Vendor, vendor_id)
+            if not vendor:
+                return jsonify({"error": "Vendor not found"}), 404
+
+            vendor.name = name
+            vendor.email = email
+            vendor.address = address
+            vendor.categories = category_objs
+        else:
+            vendor = Vendor(
+                name=name,
+                email=email,
+                address=address,
+                categories=category_objs,
+                company_id=company_id,
+            )
+            db.session.add(vendor)
+
+        db.session.commit()
+        return jsonify({"message": "Vendor managed successfully!"}), (
+            201 if not vendor_id else 200
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(e)
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route("/delete_vendor/<vendor_id>", methods=["DELETE"])
+@check_token(Position.manager)
+def delete_vendor(vendor_id):
+    vendor = db.session.get(Vendor, vendor_id)
+
+    if not vendor:
+        return jsonify({"message": "Vendor not found"}), 404
+
+    try:
+        db.session.delete(vendor)
+        db.session.commit()
+        return jsonify({"message": "Vendor deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error deleting vendor", "error": str(e)}), 500
+
+
+@app.route("/approve_vendor/<vendor_id>", methods=["POST"])
+@check_token(Position.manager)
+def approve_vendor(vendor_id):
+    vendor = db.session.get(Vendor, vendor_id)
+
+    if not vendor:
+        return jsonify({"message": "Vendor not found"}), 404
+
+    try:
+        vendor.approved = True
+        db.session.commit()
+        return jsonify({"message": "Vendor approved successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error approving vendor", "error": str(e)}), 500
+
+
+@app.route("/dashboard/vendor")
+@check_token(Position.executive)
+def vendor_dashboard():
+    return render_template("vendor.html")
+
+
+@app.route("/dashboard/report")
+@on_ajax_render("report.html")
+def report():
+    return render_template("index.html", redirect_url="/dashboard/report")
+
+
+@app.route("/get_metadata")
+@check_token(Position.manager)
+def get_metadata():
+    return jsonify(TABLES_METADATA), 200
+
+
+@app.route("/get_data_settings", methods=["POST"])
+@check_token(Position.manager)
+def get_data_settings():
+    try:
+        data: dict = request.get_json()
+        info = {}
+
+        for table, columns in data.items():
+            info[table] = {
+                "description": TABLES_METADATA[table]["description"],
+                "columns": {},
+                "relationships": {},
+            }
+
+            for col in columns:
+                column_info = TABLES_METADATA[table]["columns"].get(col)
+                if column_info:
+                    info[table]["columns"][col] = column_info
+
+            if len(data.keys()) > 1:
+                for other_table in data:
+                    if other_table != table:
+                        relationship_description = TABLES_METADATA[table][
+                            "relationships"
+                        ].get(other_table)
+                        if relationship_description:
+                            info[table]["relationships"][other_table] = (
+                                relationship_description
+                            )
+        app.logger.debug("hi")
+        response = "".join(
+            str(part)
+            for part in openai_response(
+                json.dumps(info, indent=2),
+                system_content="""You are an advanced data assistant designed to process structured data and generate visualizations using the Echarts library. Based on the provided data structure, generate a comprehensive list of possible charts, including their titles and Echarts configuration options (option object, strictly in json). Ensure the configurations are appropriately tailored to the data's format and content. If no charts can be generated due to the nature of the data, return an empty list.""",
+                streaming=False,
+            )
+        )
+
+        app.logger.debug(response)
+
+    except Exception as e:
+        app.logger.exception(e)
+
+    return jsonify(response), 200
 
 
 @app.route("/consult", methods=["POST"])
@@ -642,7 +1074,16 @@ def consult(data):
     query = data.get("chat-input")
     if not query:
         return "Query parameter is required.", 400
-    return Response(openai_streaming(query), content_type="text/plain")
+
+    streaming = data.get("streaming", "true").lower() == "true"
+    if streaming:
+        return Response(
+            (chunk for chunk in openai_response(query, streaming=True) if chunk),
+            content_type="text/plain",
+        )
+
+    response = "".join(chunk or "" for chunk in openai_response(query, streaming=False))
+    return Response(response, content_type="text/plain")
 
 
 def removeUnverifiedUsers():
@@ -650,5 +1091,4 @@ def removeUnverifiedUsers():
 
 
 if __name__ == "__main__":
-
     app.run(debug=True)

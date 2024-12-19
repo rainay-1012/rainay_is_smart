@@ -1,0 +1,79 @@
+<div
+  id="content"
+  class="px-4 overflow-y-auto py-3 overflow-x-hidden h-100"
+>
+<table
+id="purchase-table"
+class="table"
+style="width: 100%"
+>
+<thead>
+  <tr>
+    <th></th>
+    <th>ID#</th>
+    <th>Vendor Name</th>
+    <th>Status</th>
+    <th>Update</th>
+    <th class="all">Action</th>
+  </tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<form
+    class="modal fade"
+    tabindex="-1"
+    id="add-new-purchase-modal"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Purchase</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-8">
+            <input
+              id="rfqid"
+              name="id"
+              type="text"
+              readonly
+            />
+          </div> //wanted to do one drop down to select from rfq, since all the data sudah ada, just wanna get the finalised data from it
+          <div class="col-sm-8">
+          <label
+          for="rfq-list"
+          class="form-label"
+          >Purchase from:</label
+        >
+        <select
+          id="rfq-list"
+          class="mb-2 form-control"
+          autocomplete="off"
+        ></select>
+      
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

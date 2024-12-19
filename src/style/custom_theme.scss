@@ -1,4 +1,5 @@
-// $primary: #007275;
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
 $primary: #06545b;
 $primary-rgb: 0, 114, 117;
 
@@ -9,7 +10,7 @@ $primary-rgb: 0, 114, 117;
 $white: #ffffff;
 
 $theme-colors: (
-  "light": #d9f9fd,
+  "light": $light,
   "dark": #1a1744,
   "primary": $primary,
   // "secondary": #00b0a6,
@@ -20,6 +21,7 @@ $theme-colors: (
   "danger": #f42602,
 );
 
+$font-family-sans-serif: "Roboto", sans-serif;
 $input-focus-border-color: $primary;
 $btn-focus-border-color: $primary;
 
@@ -33,11 +35,28 @@ $theme-colors: $theme-colors;
 }
 
 .box-shadow-primary:focus:not(:invalid) {
-  box-shadow: 0 0 0 0.25rem rgba(138, 74, 248, 0.25) !important;
+  box-shadow: 0 0 0 0.25rem rgba(6, 84, 91, 0.25);
+}
+
+.focus .ts-control {
+  box-shadow: 0 0 0 0.25rem rgba(6, 84, 91, 0.25) !important;
+  border-color: $primary !important;
+}
+
+.ts-wrapper.multi .ts-control > div.active {
+  background: $primary !important;
 }
 
 :root {
   --dt-row-selected: #{$primary-rgb};
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: "Roboto", sans-serif !important;
 }
 
 * {
@@ -46,4 +65,41 @@ $theme-colors: $theme-colors;
 
 .text-orange {
   color: $orange-500;
+}
+
+.pointer-cursor {
+  cursor: pointer !important;
+}
+
+@media print {
+  .d-none-print {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    width: 210mm;
+    height: 282mm;
+    font-size: 11px;
+    background: #fff;
+    overflow: visible;
+  }
+  body {
+    padding-top: 15mm;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+    border: none;
+  }
 }
