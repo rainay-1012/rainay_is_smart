@@ -1,39 +1,56 @@
-<main
-  class="h-100 w-100 py-3 py-md-5 min-vh-100 d-flex justify-content-center align-items-center"
->
-  {% if style %}
-  <link
-    href="/static/assets/bootstrap-icons.woff2"
-    rel="preload"
-    as="font"
-    crossorigin=""
-  />
-  <link
-    href="<%= htmlWebpackPlugin.files.css[0] %>"
-    rel="stylesheet"
-  />
-  {% endif %}
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <div class="text-center">
-          <h2
-            class="d-flex justify-content-center align-items-center gap-2 mb-4"
-          >
-            <span class="display-1 fw-bold">{{error_start}}</span>
-            <i class="bi bi-exclamation-circle-fill text-danger display-4"></i>
-            <span class="display-1 fw-bold">{{error_end}}</span>
-          </h2>
-          <h3 class="h2 mb-2">{{error_title}}</h3>
-          <p class="mb-5">{{error_description}}</p>
-          <a
-            class="btn btn-dark rounded-pill px-5 py-3 fs-6 m-0"
-            href="{{redirect_url}}"
-            role="button"
-            >Back to Home</a
-          >
+<!DOCTYPE html>
+<html class="h-100">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="X-UA-Compatible"
+      content="IE=edge"
+    />
+    <meta
+      name="redirect-url"
+      content="{{ redirect_url | default('') }}"
+    />
+    <link
+      rel="icon"
+      href="<%= require('../assets/favicon.ico') %>"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+    <% for(var i=0; i < htmlWebpackPlugin.files.css.length; i++) {%>
+      <link href="<%= htmlWebpackPlugin.files.css[i] %>"  rel="stylesheet"></link>
+    <% } %>
+    <title>Vendosync</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+  </head>
+  <main
+    class="h-100 w-100 py-3 py-md-5 min-vh-100 d-flex justify-content-center align-items-center"
+  >
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="text-center">
+            <h2
+              class="d-flex justify-content-center align-items-center gap-2 mb-4"
+            >
+              <span class="display-1 fw-bold">{{error_start}}</span>
+              <i
+                class="bi bi-exclamation-circle-fill text-danger display-4"
+              ></i>
+              <span class="display-1 fw-bold">{{error_end}}</span>
+            </h2>
+            <h3 class="h2 mb-2">{{error_title}}</h3>
+            <p class="mb-5">{{error_description}}</p>
+            <a
+              class="btn btn-dark rounded-pill px-5 py-3 fs-6 m-0"
+              href="{{redirect_url}}"
+              role="button"
+              >Back to Home</a
+            >
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
+</html>

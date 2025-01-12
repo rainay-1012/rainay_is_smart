@@ -11,23 +11,8 @@ input {
   caret-color: auto;
 }
 
-div.form-group,
-.form-floating {
-  margin-bottom: 1.5rem;
-}
-
-div.invalid-feedback {
-  // height: 0px;
-}
-
-.form-check-input.is-valid ~ .form-check-label,
-.was-validated .form-check-input:valid ~ .form-check-label {
-  color: inherit !important;
-  border-color: inherit !important;
-}
-
 .invalid-feedback {
-  font-size: 0.7rem;
+  font-size: 0.7rem !important;
 }
 
 .bs-tooltip-html .tooltip-inner {
@@ -37,7 +22,6 @@ div.invalid-feedback {
 
 .container-loading-bar {
   position: relative;
-  overflow-x: hidden;
 
   &::after {
     z-index: 10001;
@@ -46,7 +30,7 @@ div.invalid-feedback {
     left: 0;
     width: 20%;
     height: 3px;
-    background: var(--bs-primary);
+    background: var(--mdb-primary);
     top: 0;
     animation: loading-bar 2s linear infinite;
   }
@@ -66,4 +50,12 @@ div.invalid-feedback {
 
 #form-carousel .carousel-item {
   transition-duration: 0.5s;
+}
+
+::-ms-reveal {
+  display: none;
+}
+
+.border-opacity-0 {
+  border-color: transparent !important;
 }

@@ -1,0 +1,204 @@
+<div
+  id="content"
+  class="px-4 overflow-y-auto py-3 overflow-x-hidden h-100"
+>
+  <div class="card card-body">
+    <table
+      id="user-table"
+      class="table"
+      style="width: 100%"
+    >
+      <thead>
+        <tr>
+          <th>ID#</th>
+          <th>Photo</th>
+          <th>Full Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th class="all">Role</th>
+          <th>Date</th>
+          <th class="all">Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <form
+    class="modal fade needs-validation"
+    tabindex="-1"
+    id="user-form"
+    novalidate
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit User</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex">
+            <div
+              class="d-flex flex-column justify-content-center align-items-center ps-4 pe-5"
+            >
+              <div
+                class="bg-image ripple rounded-circle"
+                data-mdb-ripple-color="light"
+                style="width: 100px; height: 100px"
+              >
+                <img
+                  id="user-photo"
+                  src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg"
+                  class="w-100"
+                />
+              </div>
+            </div>
+            <div class="flex-grow-1 mb-2">
+              <div
+                class="d-flex justify-content-center align-items-center border-bottom"
+              >
+                <div class="col-sm-1 col-form-label text-dark">
+                  <i class="bi bi-person-vcard-fill text-primary fs-5"></i>
+                </div>
+                <div class="col-sm-11">
+                  <div
+                    id="user-id"
+                    class="ms-3"
+                  ></div>
+                </div>
+              </div>
+              <div
+                class="d-flex justify-content-center align-items-center border-bottom"
+              >
+                <div class="col-sm-1 col-form-label text-dark">
+                  <i class="bi bi-envelope-fill text-primary fs-5"></i>
+                </div>
+                <div class="col-sm-11">
+                  <div
+                    id="user-email"
+                    class="ms-3"
+                  ></div>
+                </div>
+              </div>
+              <div
+                class="d-flex justify-content-center align-items-center border-bottom"
+              >
+                <div class="col-sm-1 col-form-label text-dark">
+                  <i class="bi bi-calendar-check-fill text-primary fs-5"></i>
+                </div>
+                <div class="col-sm-11">
+                  <div
+                    id="user-date"
+                    class="ms-3 text-capitalize"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <input
+              id="user-uid"
+              name="uid"
+              hidden
+            />
+            <div class="mb-4h">
+              <select
+                class="form-select border border-2 form-select-lg"
+                name="role"
+              >
+                <option
+                  value=""
+                  disabled
+                  selected
+                >
+                  Select a role
+                </option>
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="executive">Executive</option>
+              </select>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div
+              class="form-outline user-select-none position-relative mb-4h"
+              data-mdb-input-init
+            >
+              <input
+                type="text"
+                id="user-fullname"
+                name="name"
+                class="form-control form-control-lg"
+                placeholder=""
+                required
+              />
+              <label
+                for="user-fullname"
+                class="form-label"
+                >Full Name</label
+              >
+              <div class="invalid-feedback"></div>
+            </div>
+            <div
+              class="form-outline user-select-none position-relative mb-4h"
+              data-mdb-input-init
+            >
+              <input
+                type="text"
+                id="user-username"
+                name="username"
+                class="form-control form-control-lg"
+                placeholder=""
+                required
+              />
+              <label
+                for="user-username"
+                class="form-label"
+                >Username</label
+              >
+              <div class="invalid-feedback"></div>
+            </div>
+            <div
+              class="form-outline user-select-none position-relative mb-3"
+              data-mdb-input-init
+            >
+              <input
+                type="tel"
+                id="user-phoneNo"
+                name="phoneNo"
+                class="form-control form-control-lg"
+                placeholder=""
+                required
+              />
+              <label
+                for="user-phoneNo"
+                class="form-label"
+                >Phone No.</label
+              >
+              <div class="invalid-feedback"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

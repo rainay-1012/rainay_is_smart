@@ -1,249 +1,187 @@
 <div
   id="content"
-  class="px-4 overflow-y-auto overflow-x-hidden h-100"
+  class="px-4 overflow-y-auto py-3 overflow-x-hidden h-100 d-flex flex-column"
 >
-  <ul
-    class="list-group list-group-horizontal position-relative overflow-auto w-100"
-    role="tablist"
-  >
-    <li
-      class="list-group-item border-0 me-1 active"
-      role="tab"
-      data-bs-toggle="pill"
-      data-bs-target="#tab1"
-    >
-      <div class="card shadow-sm pointer-cursor">
-        <div class="card-body">
-          <div class="mb-4 d-flex align-items-start justify-content-between">
-            <div class="d-flex flex-column justify-content-center me-4">
-              <div class="fw-medium">#7271890209422352384</div>
-              <small class="text-muted">12 Nov 2024</small>
-            </div>
-            <span class="badge text-bg-success text-light mt-1">Processed</span>
-          </div>
-          <div
-            class="progress mb-2"
-            style="height: 8px"
-          >
-            <div
-              class="progress-bar"
-              role="progressbar"
-              style="width: 75%"
-              aria-valuenow="75"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            ></div>
-          </div>
-          <div class="small">
-            10 RFQs Processed
-            <span class="text-muted">of 13 RFQs</span>
-          </div>
-        </div>
-      </div>
-    </li>
-    <li
-      class="list-group-item border-0 me-1"
-      role="tab"
-      data-bs-toggle="pill"
-      data-bs-target="#tab2"
-    >
-      <div class="card shadow-sm pointer-cursor">
-        <div class="card-body">
-          <div class="mb-4 d-flex align-items-start justify-content-between">
-            <div class="d-flex flex-column justify-content-center me-4">
-              <div class="fw-medium">#7271890209422352384</div>
-              <small class="text-muted">12 Nov 2024</small>
-            </div>
-            <span class="badge text-bg-success text-light mt-1">Processed</span>
-          </div>
-          <div
-            class="progress mb-2"
-            style="height: 8px"
-          >
-            <div
-              class="progress-bar"
-              role="progressbar"
-              style="width: 75%"
-              aria-valuenow="75"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            ></div>
-          </div>
-          <div class="small">
-            10 RFQs Processed
-            <span class="text-muted">of 13 RFQs</span>
-          </div>
-        </div>
-      </div>
-    </li>
-    <li
-      class="list-group-item border-0 me-1"
-      role="tab"
-      data-bs-toggle="pill"
-      data-bs-target="#tab3"
-    >
-      <div class="card shadow-sm pointer-cursor">
-        <div class="card-body">
-          <div class="mb-4 d-flex align-items-start justify-content-between">
-            <div class="d-flex flex-column justify-content-center me-4">
-              <div class="fw-medium">#7271890209422352384</div>
-              <small class="text-muted">12 Nov 2024</small>
-            </div>
-            <span class="badge text-bg-success text-light mt-1">Processed</span>
-          </div>
-          <div
-            class="progress mb-2"
-            style="height: 8px"
-          >
-            <div
-              class="progress-bar"
-              role="progressbar"
-              style="width: 75%"
-              aria-valuenow="75"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            ></div>
-          </div>
-          <div class="small">
-            10 RFQs Processed
-            <span class="text-muted">of 13 RFQs</span>
-          </div>
-        </div>
-      </div>
-    </li>
-    <li
-      class="list-group-item border-0 me-1"
-      role="tab"
-      data-bs-toggle="pill"
-      data-bs-target="#tab4"
-    >
-      <div class="card shadow-sm pointer-cursor">
-        <div class="card-body">
-          <div class="mb-4 d-flex align-items-start justify-content-between">
-            <div class="d-flex flex-column justify-content-center me-4">
-              <div class="fw-medium">#7271890209422352384</div>
-              <small class="text-muted">12 Nov 2024</small>
-            </div>
-            <span class="badge text-bg-success text-light mt-1">Processed</span>
-          </div>
-          <div
-            class="progress mb-2"
-            style="height: 8px"
-          >
-            <div
-              class="progress-bar"
-              role="progressbar"
-              style="width: 75%"
-              aria-valuenow="75"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            ></div>
-          </div>
-          <div class="small">
-            10 RFQs Processed
-            <span class="text-muted">of 13 RFQs</span>
-          </div>
-        </div>
-      </div>
-    </li>
-  </ul>
   <div
-    class="tab-content"
-    id="nav-tabContent"
+    id="procurement-list"
+    class="mb-2"
   >
     <div
-      class="tab-pane fade show active p-5 card"
-      id="tab1"
-      role="tabpanel"
+      class="list-group list-group-horizontal position-relative w-100 list pb-2"
+      id="procurement-list-inner"
+    ></div>
+  </div>
+  <div
+    class="flex-grow-1 card card-body position-relative"
+    id="procurement-content"
+  >
+    <div
+      class="position-absolute top-0 start-0 z-2 d-flex justify-content-center align-items-center h-100 w-100 bg-white"
+      id="default-content"
     >
-      <table class="table table-borderless justify-content-center">
-        <thead>
-          <tr class="border-bottom">
-            <th
-              scope="col"
-              style="width: 80%"
-              class="border-end"
+      No data available
+    </div>
+    <div class="container h-100">
+      <div class="row h-100 bg-white z-1 gx-5">
+        <div class="col-9 d-flex flex-column">
+          <table
+            class="table"
+            id="procurement-table"
+          >
+            <thead>
+              <th></th>
+              <th></th>
+              <th>Item name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Price</th>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="mt-auto d-flex justify-content-end align-items-center">
+            <button
+              id="suggestion-btn"
+              type="button"
+              class="btn btn-secondary"
             >
-              Suggested vendor
-            </th>
-            <th
-              scope="col"
-              style="width: 20%"
-              class="text-center align-items-center"
+              Suggestion
+            </button>
+            <button
+              id="rfq-btn"
+              type="button"
+              class="btn btn-primary ms-3"
             >
-              <i
-                class="bx bx-mail-send text-dark"
-                style="width: 40"
-              ></i>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="border-end">Starbucks</td>
-            <td align="center">
-              <button
-                type="button"
-                class="btn btn-outline-primary d-flex align-items-center justify-content-center me-2"
-                data-bs-toggle="modal"
-                data-bs-target="#addRFQModal"
+              RFQ
+            </button>
+          </div>
+        </div>
+        <div
+          class="col-3 d-flex card p-0"
+          id="vendor-list"
+        >
+          <div class="card-header p-0">
+            <div
+              class="form-outline user-select-none position-relative"
+              data-mdb-input-init
+            >
+              <input
+                type="search"
+                id="search-vendor"
+                name="vendor"
+                class="form-control form-control-lg search"
+                placeholder=""
+                required
+              />
+              <label
+                for="search-vendor"
+                class="form-label"
+                >Seach suggested vendors</label
               >
-                <i class="bx bxs-message-dots"></i>
-                RFQ
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="border-end">Chagee</td>
-            <td align="center">
-              <button
-                type="button"
-                class="btn btn-outline-primary d-flex align-items-center justify-content-center me-2"
-                data-bs-toggle="modal"
-                data-bs-target="#addRFQModal"
-              >
-                <i class="bx bxs-message-dots"></i>
-                RFQ
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="border-end">Tealive</td>
-            <td align="center">
-              <button
-                type="button"
-                class="btn btn-outline-primary d-flex align-items-center justify-content-center me-2"
-                data-bs-toggle="modal"
-                data-bs-target="#addRFQModal"
-              >
-                <i class="bx bxs-message-dots"></i>
-                RFQ
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </div>
+          <div class="position-relative d-flex flex-grow-1">
+            <div
+              class="position-absolute top-0 start-0 z-1 d-flex justify-content-center align-items-center h-100 w-100 bg-white"
+              id="vendor-default-content"
+            >
+              No data available
+            </div>
+            <ul
+              class="list-group flex-grow-1 mt-0 card-body rounded-0 p-0 border-0 list"
+            ></ul>
+          </div>
+        </div>
+      </div>
     </div>
-    <div
-      class="tab-pane fade p-5 card"
-      id="tab2"
-      role="tabpanel"
-    >
-      tab2
-    </div>
-    <div
-      class="tab-pane fade p-5 card"
-      id="tab3"
-      role="tabpanel"
-    >
-      tab3
-    </div>
-    <div
-      class="tab-pane fade p-5 card"
-      id="tab4"
-      role="tabpanel"
-    >
-      tab4
+  </div>
+  <div
+    class="modal fade"
+    id="review-modal"
+    tabindex="-1"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            Assessment Gred: <span id="review-gred">80.4%</span>
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-mdb-ripple-init
+            data-mdb-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="mb-3 text-primary-emphasis">Review(s)</div>
+
+            <div class="d-flex">
+              <div class="d-flex flex-column me-3">
+                <div
+                  class="progress-vertical justify-content-end"
+                  style="width: 8px"
+                >
+                  <div
+                    class="progress-bar"
+                    role="progressbar"
+                    id="review-gred-progress"
+                  ></div>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <template id="review-template">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header">
+                      <button
+                        data-mdb-collapse-init
+                        class="accordion-button collapsed"
+                        type="button"
+                        data-mdb-toggle="collapse"
+                      >
+                        <i class="bi bi-star-fill text-warning me-1"></i
+                        ><i class="bi bi-star-fill text-warning me-1"></i
+                        ><i class="bi bi-star-fill text-secondary me-1"></i>
+                        <i class="bi bi-star-fill text-secondary me-1"></i>
+                        <i class="bi bi-star-fill text-secondary me-1"></i>
+                        <div class="ms-3 small text-muted review-date"></div>
+                      </button>
+                    </h2>
+                    <div class="accordion-collapse collapse">
+                      <div class="accordion-body overflow-auto">
+                        <i class="bi bi-chat-left-quote-fill"></i>
+                        <div class="review-caption"></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <div
+                  class="accordion accordion-flush"
+                  id="review-list"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-mdb-ripple-init
+            data-mdb-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-mdb-ripple-init
+          >
+            Save changes
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

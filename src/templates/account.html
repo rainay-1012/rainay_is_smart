@@ -1,0 +1,626 @@
+<main
+  class="w-100 h-100 d-flex justify-content-center align-items-center flex-column bg-primary-subtle"
+>
+  <div
+    class="col-sm-12 col-md-9 col-lg-8 flex-grow-1 flex-md-grow-0 d-flex flex-column"
+  >
+    <div
+      class="card p-4 rounded-9 flex-grow-1 flex-md-grow-0"
+      id="card"
+    >
+      <div>
+        <img
+          src="<%= require('../assets/logo only.svg') %>"
+          height="60"
+          class="mb-2"
+        />
+      </div>
+      <div class="row gy-5 gy-md-0">
+        <div class="col-sm-12 col-md-6">
+          <div
+            class="display-5 fw-normal h1 d-flex mb-3 text-primary"
+            id="title"
+          >
+            Sign in
+          </div>
+          <div
+            class="fw-normal"
+            id="subtitle"
+          >
+            Use your Google/Email Account
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-6 overflow-visible">
+          <div
+            class="carousel slide overflow-visible"
+            id="form-carousel"
+            data-mdb-touch="false"
+            data-mdb-wrap="false"
+            data-mdb-pause="false"
+            data-mdb-keyboard="false"
+          >
+            <div class="carousel-inner">
+              <form
+                class="carousel-item active p-1 needs-validation"
+                novalidate
+                id="email-form"
+                data-title="Sign in"
+                data-subtitle="Use your Google/Email Account"
+              >
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                  <button
+                    type="button"
+                    id="google-signin"
+                    class="btn btn-light btn-circle shadow-sm"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="dark"
+                  >
+                    <!-- <img
+                      src="<%= require('../assets/google.svg') %>"
+                      height="24"
+                      class="me-2 w-auto"
+                    /> -->
+                    <!-- <div>Sign in with Google</div> -->
+                    <i class="bi bi-google fs-4"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    id="facebook-signin"
+                    class="btn btn-light btn-circle shadow-sm"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="dark"
+                  >
+                    <i class="bi bi-facebook fs-4"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    id="twitter-signin"
+                    class="btn btn-light btn-circle shadow-sm"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="dark"
+                  >
+                    <i class="bi bi-twitter-x fs-4"></i>
+                  </button>
+                </div>
+                <div class="d-flex align-items-center my-3">
+                  <hr class="flex-grow-1" />
+                  <span class="mx-2 text-muted">OR</span>
+                  <hr class="flex-grow-1" />
+                </div>
+                <div
+                  data-mdb-input-init
+                  class="form-outline user-select-none mb-5 position-relative"
+                >
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="email"
+                    class="form-label"
+                    >Email</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="d-flex justify-content-end align-items-center">
+                  <button
+                    id="create-account"
+                    type="button"
+                    class="btn btn-outline-primary border-opacity-0 btn-rounded me-3"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="primary"
+                  >
+                    Create account
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-rounded"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="light"
+                  >
+                    Next
+                  </button>
+                </div>
+              </form>
+              <form
+                class="carousel-item p-1"
+                id="password-form"
+                novalidate
+                autocomplete="false"
+                data-title="Sign in"
+                data-subtitle="Enter your password"
+              >
+                <input
+                  type="hidden"
+                  id="hidden-email"
+                  name="hidden-email"
+                  required
+                  hidden
+                />
+                <div
+                  class="form-outline user-select-none position-relative"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="password"
+                    class="form-label"
+                    >Password</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div
+                  class="d-flex align-items-center justify-content-between mt-5 mb-5"
+                >
+                  <div class="form-check d-flex align-items-center">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      name="remember"
+                      id="Remember"
+                      data-constant-no-validate="true"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="Remember"
+                      >Remember</label
+                    >
+                  </div>
+                  <div
+                    id="forgot-password"
+                    role="button"
+                    class="link-primary text-decoration-underline link-underline-primary"
+                  >
+                    Forgot password
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end align-items-stretch">
+                  <button
+                    type="button"
+                    data-mdb-target="#form-carousel"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="primary"
+                    data-mdb-slide-to="0"
+                    class="btn btn-outline-primary btn-rounded border-opacity-0 me-3"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    data-mdb-ripple-init
+                    data-mdb-ripple-color="light"
+                    class="btn btn-primary btn-rounded"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </form>
+              <form
+                class="carousel-item p-1"
+                id="info-form"
+                novalidate
+                data-title="Create account"
+                data-subtitle="Enter your personal infomation"
+              >
+                <div
+                  class="form-outline user-select-none position-relative mb-4h"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="text"
+                    id="fullname"
+                    name="fullname"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="fullname"
+                    class="form-label"
+                    >Full name</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div
+                  class="form-outline user-select-none position-relative mb-4h"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="username"
+                    class="form-label"
+                    >Username</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div
+                  class="form-outline user-select-none position-relative mb-5"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="phone"
+                    class="form-label"
+                    >Phone No</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="d-flex justify-content-end align-items-center">
+                  <button
+                    type="button"
+                    data-mdb-target="#form-carousel"
+                    data-mdb-slide-to="0"
+                    class="btn btn-outline-primary border-opacity-0 btn-rounded me-3"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-rounded"
+                    data-mdb-target="#form-carousel"
+                  >
+                    Next
+                  </button>
+                </div>
+              </form>
+              <form
+                class="carousel-item p-1"
+                id="register-form"
+                novalidate
+                data-title="Create account"
+                data-subtitle="Enter your password"
+              >
+                <div
+                  class="form-outline user-select-none position-relative mb-4h"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="email"
+                    id="register-email"
+                    name="register-email"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="register-email"
+                    class="form-label"
+                    >Email</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div
+                  class="form-outline user-select-none position-relative mb-4h"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="password"
+                    id="register-password"
+                    name="password"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="register-password"
+                    class="form-label"
+                    >Password</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div
+                  class="form-outline user-select-none position-relative mb-5"
+                  data-mdb-input-init
+                >
+                  <input
+                    type="password"
+                    id="confirm-password"
+                    name="confirm-password"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                    required
+                  />
+                  <label
+                    for="confirm-password"
+                    class="form-label"
+                    >Confirm Password</label
+                  >
+                  <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="d-flex justify-content-end align-items-center">
+                  <button
+                    type="button"
+                    data-mdb-target="#form-carousel"
+                    data-mdb-slide-to="2"
+                    class="btn btn-outline-primary border-opacity-0 btn-rounded me-3"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-rounded"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="mt-3 d-flex d-md-none justify-content-end w-100 flex-grow-1 align-items-end"
+      >
+        <a
+          href="#"
+          class="text-decoration-none text-end"
+          data-bs-toggle="modal"
+          data-bs-target="#tnc"
+          >Terms and Conditions</a
+        >
+      </div>
+    </div>
+    <div class="mt-3 d-none d-md-flex justify-content-end w-100">
+      <a
+        href="#"
+        class="text-decoration-none text-end me-3"
+        data-bs-toggle="modal"
+        data-bs-target="#tnc"
+        >Terms and Conditions</a
+      >
+    </div>
+  </div>
+
+  <div
+    class="modal fade modal-lg"
+    id="tnc"
+    tabindex="-1"
+    role="dialog"
+  >
+    <div
+      class="modal-dialog modal-dialog-centered"
+      role="document"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Terms and Conditions</h5>
+
+          <button
+            type="button"
+            data-bs-dismiss="modal"
+            class="btn btn-close"
+          ></button>
+        </div>
+        <div
+          class="modal-body overflow-y-scroll overflow-x-hidden"
+          style="height: 70vh"
+        >
+          <p><strong>Effective Date:</strong> November 17, 2024</p>
+          <p>
+            These Terms and Conditions ("Terms") govern your access to and use
+            of the Digital Procurement and Vendor Management System ("System").
+            By registering for an account or using the System, you agree to
+            these Terms. Please read them carefully before proceeding.
+          </p>
+
+          <section>
+            1. Account Registration
+            <ul>
+              <li>
+                <strong>Eligibility:</strong> To register for and use the
+                System, you must be a legal representative of a business or
+                organization and provide accurate and truthful information
+                during the registration process.
+              </li>
+              <li>
+                <strong>Account Credentials:</strong> You are responsible for
+                maintaining the confidentiality of your account credentials and
+                agree to notify us immediately if your account is compromised.
+              </li>
+              <li>
+                <strong>Verification:</strong> We reserve the right to verify
+                your identity and the legitimacy of your business or
+                organization before granting access to the System.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            2. Permitted Use
+            <ul>
+              <li>
+                You may use the System exclusively for legitimate procurement
+                and vendor management purposes as per your organization’s needs.
+              </li>
+              <li>
+                You must not use the System for fraudulent or unlawful
+                activities, share your login credentials with unauthorized
+                users, or interfere with the System's operation.
+              </li>
+              <li>
+                Unauthorized or abusive use of the System may result in
+                suspension or termination of your account.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            3. Vendor and Procurement Activities
+            <ul>
+              <li>
+                <strong>Bidding Management:</strong> You agree to conduct
+                bidding activities transparently and fairly within the System.
+              </li>
+              <li>
+                <strong>Vendor Evaluation:</strong> Vendor evaluation tools in
+                the System are based on your provided data. We are not liable
+                for decisions made based on such evaluations.
+              </li>
+              <li>
+                <strong>Contract Management:</strong> The System facilitates
+                contract management but does not replace legal or regulatory
+                compliance requirements.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            4. Privacy and Data Usage
+            <ul>
+              <li>
+                <strong>Data Collection:</strong> We collect and store data
+                related to your procurement activities, vendors, and
+                organizational details in compliance with our Privacy Policy.
+              </li>
+              <li>
+                <strong>Data Security:</strong> We employ industry-standard
+                measures to secure your data but acknowledge that no system is
+                entirely immune to risks.
+              </li>
+              <li>
+                <strong>Data Sharing:</strong> We do not sell or share your data
+                with third parties except as required for legal compliance or as
+                agreed in our Privacy Policy.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            5. User Responsibilities
+            <ul>
+              <li>
+                You agree to comply with all applicable laws and regulations
+                governing procurement and vendor management.
+              </li>
+              <li>
+                You are responsible for the accuracy of all data entered into
+                the System.
+              </li>
+              <li>
+                Disputes with vendors or third parties arising from System use
+                are your responsibility.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            6. Fees and Payments
+            <ul>
+              <li>
+                <strong>Subscription Fees:</strong> Use of the System may
+                require a subscription fee or other charges as outlined during
+                registration.
+              </li>
+              <li>
+                <strong>Refund Policy:</strong> Fees paid are non-refundable
+                unless explicitly stated otherwise in our Refund Policy.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            7. Limitation of Liability
+            <ul>
+              <li>
+                <strong>No Warranties:</strong> The System is provided "as is"
+                without warranties of any kind.
+              </li>
+              <li>
+                <strong>Indirect Damages:</strong> We are not liable for
+                indirect, incidental, or consequential damages arising from your
+                use of the System.
+              </li>
+              <li>
+                <strong>Maximum Liability:</strong> Our maximum liability to you
+                shall not exceed the total fees paid by you for the System's
+                use.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            8. Termination of Access
+            <ul>
+              <li>You may terminate your account at any time.</li>
+              <li>
+                We reserve the right to terminate your access for breach of
+                these Terms or activities compromising the System's integrity or
+                security.
+              </li>
+              <li>
+                Upon termination, you will lose access to all data within the
+                System. Back up necessary information before account
+                termination.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            9. Modifications to Terms and System
+            <ul>
+              <li>
+                We may update these Terms periodically. Continued use of the
+                System after changes constitutes acceptance of the updated
+                Terms.
+              </li>
+              <li>
+                We reserve the right to modify or discontinue features of the
+                System without prior notice.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            10. Governing Law
+            <p>
+              These Terms are governed by the laws of Malaysia. You agree to
+              submit to the exclusive jurisdiction of the courts of Malaysia for
+              any disputes arising from these Terms or the System.
+            </p>
+          </section>
+
+          <section>
+            11. Contact Information
+            <p>For questions or concerns, please contact us at:</p>
+            <p><strong>Email:</strong> vendosync@gmail.com</p>
+            <p><strong>Phone:</strong> +60-12-345-6789</p>
+          </section>
+
+          <footer class="footer">
+            <p>&copy; 2024 Digital Procurement and Vendor Management System</p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

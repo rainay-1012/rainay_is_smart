@@ -1,8 +1,10 @@
-import { FirebaseError, initializeApp } from "@firebase/app";
+import { initializeApp } from "@firebase/app";
 import {
   browserLocalPersistence,
   browserSessionPersistence,
   EmailAuthProvider,
+  FacebookAuthProvider,
+  getAdditionalUserInfo,
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -11,11 +13,13 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  TwitterAuthProvider,
+  updateCurrentUser,
   updatePassword,
   User,
 } from "@firebase/auth";
 import "dotenv";
-import { AlertType, ContentResponse, GeneralResponse, showAlert } from ".";
+import { Response } from ".";
 
 interface FirebaseConfig {
   apiKey: string;
@@ -47,14 +51,18 @@ export const authStateChangedListener = (
   return onAuthStateChanged(auth, callback);
 };
 
+export const getCurrentUser = () => {
+  return auth.currentUser;
+};
+
 export const getCurrentUserToken = async (): Promise<string | null> => {
   if (auth.currentUser) {
-    return await auth.currentUser.getIdToken();
+    return await auth.currentUser.getIdToken(true);
   } else {
     return new Promise((resolve) => {
       authStateChangedListener((user) => {
         if (user) {
-          resolve(user.getIdToken());
+          resolve(user.getIdToken(true));
         } else {
           resolve(null);
         }
@@ -63,59 +71,51 @@ export const getCurrentUserToken = async (): Promise<string | null> => {
   }
 };
 
-interface UserRoleResponse {
-  role: string;
-}
+export const updateUser = async (user: User) => {
+  await updateCurrentUser(auth, user);
+};
 
-export const getCurrentUserRole = async (
-  currentUserToken: string | null
-): Promise<string> => {
-  if (!currentUserToken) {
-    throw new Error("User is not authenticated. No token provided.");
+export const getCurrentUserClaims = async (): Promise<any> => {
+  if (!auth.currentUser) {
+    throw new Error("User is not authenticated. Please login to proceed.");
   }
 
   try {
-    const response = await fetch(`/get_user_role`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${currentUserToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw {
-        code: response.status,
-        message: errorData.message || response.statusText,
-      };
-    }
-
-    const data: UserRoleResponse = await response.json();
-    return data.role;
+    const idTokenResult = await auth.currentUser.getIdTokenResult();
+    return idTokenResult.claims;
   } catch (error) {
     console.error("Error fetching user role:", error);
     throw error;
   }
 };
 
-interface SignupRequest {
+export interface SignupRequest {
   email: string;
   password: string;
-  token: string;
+  fullname: string;
+  username: string;
+  phone: string;
 }
 
 export const signup = async ({
   email,
   password,
-  token,
-}: SignupRequest): Promise<GeneralResponse> => {
-  const response = await fetch(`/create_user`, {
+  fullname,
+  username,
+  phone,
+}: SignupRequest): Promise<Response> => {
+  const response = await fetch(`/create_email_user`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password, token }),
+    body: JSON.stringify({
+      email: email,
+      password: password,
+      fullname: fullname,
+      username: username,
+      phone: phone,
+    }),
   });
 
   if (!response.ok) {
@@ -123,7 +123,7 @@ export const signup = async ({
     throw errorData;
   }
 
-  const data: GeneralResponse = await response.json();
+  const data: Response = await response.json();
   return data;
 };
 
@@ -133,7 +133,7 @@ interface LoginRequest {
   remember?: boolean;
 }
 
-interface LoginResponse extends GeneralResponse {
+interface LoginResponse extends Response {
   redirect: string;
 }
 
@@ -152,40 +152,12 @@ export const login = async ({
     password
   );
   const token = await userCredential.user.getIdToken(true);
+  console.log(token);
   return await validateToken(token);
 };
 
-export async function handleForgotPassword(email: string) {
-  try {
-    await sendPasswordResetEmail(auth, email);
-    showAlert("Password reset email sent! Please check your inbox.", {
-      type: AlertType.SUCCESS,
-      position: "fixed-top",
-    });
-  } catch (error) {
-    if (error instanceof FirebaseError) {
-      console.error("Error during password reset:", error.message);
-      switch (error.code) {
-        case "auth/invalid-email":
-          showAlert("Invalid email address. Please try again.", {
-            type: AlertType.DANGER,
-            position: "fixed-top",
-          });
-          break;
-        case "auth/user-not-found":
-          showAlert("No user found with this email address.", {
-            type: AlertType.DANGER,
-            position: "fixed-top",
-          });
-          break;
-        default:
-          showAlert(`Error: ${error.message}`, {
-            type: AlertType.DANGER,
-            position: "fixed-top",
-          });
-      }
-    }
-  }
+export async function sendResetPassword(email: string) {
+  await sendPasswordResetEmail(auth, email);
 }
 
 export const verifyCompanyToken = async (token: string) => {
@@ -197,11 +169,11 @@ export const verifyCompanyToken = async (token: string) => {
   });
 
   if (!response.ok) {
-    const errorData: GeneralResponse = await response.json();
+    const errorData: Response = await response.json();
     throw errorData;
   }
 
-  const data: GeneralResponse = await response.json();
+  const data: Response = await response.json();
   return data;
 };
 
@@ -214,7 +186,7 @@ export const validateToken = async (token: string) => {
   });
 
   if (!response.ok) {
-    const errorData: ContentResponse = await response.json();
+    const errorData = await response.json();
     throw errorData;
   }
 
@@ -224,7 +196,7 @@ export const validateToken = async (token: string) => {
 
 export const logout = async (toLogin: boolean = true): Promise<void> => {
   await signOut(auth);
-  if (toLogin) window.location.pathname = "/login";
+  if (toLogin) window.location.pathname = "/";
 };
 
 interface UpdatePasswordRequest {
@@ -237,7 +209,6 @@ export const changePassword = async ({
   newPassword,
 }: UpdatePasswordRequest): Promise<void> => {
   const user = auth.currentUser;
-
   console.log(oldPassword, newPassword);
 
   if (!user) {
@@ -250,27 +221,54 @@ export const changePassword = async ({
   await updatePassword(user, newPassword);
 };
 
-export const signUpWithGoogle = async (token: string) => {
-  const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
+export enum SocialLogin {
+  Google,
+  Twitter,
+  Facebook,
+}
 
-  const user = result.user;
-  const id_token = await user.getIdToken(true);
+export const signUpWithSocialLogin = async (socialLogin: SocialLogin) => {
+  try {
+    let provider;
+    switch (socialLogin) {
+      case SocialLogin.Google:
+        provider = new GoogleAuthProvider();
+        break;
+      case SocialLogin.Twitter:
+        provider = new TwitterAuthProvider();
+        break;
+      case SocialLogin.Facebook:
+        provider = new FacebookAuthProvider();
+        break;
+      default:
+        return;
+    }
 
-  const response = await fetch("/create_user", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id_token: id_token,
-      token: token,
-    }),
-  });
+    const userCredential = await signInWithPopup(auth, provider);
 
-  if (!response.ok) {
-    throw await response.json();
+    if (socialLogin === SocialLogin.Facebook) {
+      const token =
+        FacebookAuthProvider.credentialFromResult(userCredential)?.accessToken;
+      token && localStorage.setItem("profileUrlToken", token);
+    }
+
+    if (getAdditionalUserInfo(userCredential)?.isNewUser) {
+      const idToken = await userCredential.user.getIdToken(true);
+
+      const response = await fetch("auth/success-redirect", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to set default claims");
+      }
+
+      await userCredential.user.reload();
+    }
+  } catch (error) {
+    console.error(`Social sign failed with type ${socialLogin}:`, error);
+    throw error;
   }
-
-  return await response.json();
 };

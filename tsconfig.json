@@ -10,10 +10,15 @@
     "sourceMap": true, // Enable source maps for debugging
     "allowJs": true, // Allow JavaScript files to be included in the build (for gradual migration)
     // "checkJs": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types/",
+    ]
   },
   "include": [
-    "src/js/*"
+    "src/js/*",
+    "mdb-ui-kit.d.ts"
   ], // Folder where your TS/JS files are
   "exclude": [
     "node_modules",

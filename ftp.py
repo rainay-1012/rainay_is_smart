@@ -10,10 +10,12 @@ FTP_PASS = "5fByDd\\fs5!F%f;DK'LL="
 # Directories to upload
 CURRENT_DIR = os.getcwd()
 DIST_DIR = os.path.join(CURRENT_DIR, "dist")
+PYTHON_DIR = os.path.join(CURRENT_DIR, "python")
 
 # FTP target directories
 PUBLIC_DIR = "/public"
 DIST_PUBLIC_DIR = "/public/dist"
+PYTHON_PUBLIC_DIR = "/public/python"
 
 
 def list_files_and_folders(ftp, remote_dir):
@@ -69,9 +71,10 @@ def run_npm_build():
 
 
 def main():
-    # Connect to FTP
-    run_npm_build()
+    # Run npm build
+    # run_npm_build()
 
+    # Connect to FTP
     ftp = FTP(FTP_HOST)
     ftp.login(FTP_USER, FTP_PASS)
 
@@ -79,16 +82,13 @@ def main():
         # List files and folders in /public
         list_files_and_folders(ftp, PUBLIC_DIR)
 
-        # # Upload all .py files from the current directory to /public
-        for file_name in os.listdir(CURRENT_DIR):
-            if file_name.endswith(".py") and not file_name == "ftp.py":
-                local_file_path = os.path.join(CURRENT_DIR, file_name)
-                remote_file_path = os.path.join(PUBLIC_DIR, file_name).replace(
-                    "\\", "/"
-                )
-                upload_file(ftp, local_file_path, remote_file_path)
+        # Upload /python directory to /public/python
+        if os.path.exists(PYTHON_DIR) and os.path.isdir(PYTHON_DIR):
+            upload_directory(ftp, PYTHON_DIR, PYTHON_PUBLIC_DIR)
+        else:
+            print(f"Directory {PYTHON_DIR} does not exist.")
 
-        # Upload the dist directory to /public/dist
+        # Upload /dist directory to /public/dist
         if os.path.exists(DIST_DIR) and os.path.isdir(DIST_DIR):
             upload_directory(ftp, DIST_DIR, DIST_PUBLIC_DIR)
         else:

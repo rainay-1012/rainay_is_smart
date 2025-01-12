@@ -107,6 +107,68 @@ export async function initRFQ() {
   const printBtn = document.querySelector("#print-btn");
   printBtn?.addEventListener("click", () => window.print());
 
+  document.addEventListener("DOMContentLoaded", () => {
+    const rfqTable = document.getElementById("rfqTable");
+    const tbody = rfqTable.querySelector("tbody");
+    const template = document.getElementById("item");
+    const totalCell = document.getElementById("total");
+
+    // Function to update subtotal and total
+    const updateTotals = () => {
+      let grandTotal = 0;
+      tbody.querySelectorAll("tr").forEach((row) => {
+        const quantityInput = row.querySelector(".quantity input");
+        const priceInput = row.querySelector(".price input");
+        const totalCell = row.querySelector(".total");
+
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const subtotal = quantity * price;
+
+        totalCell.textContent = subtotal.toFixed(2);
+        grandTotal += subtotal;
+      });
+      totalCell.textContent = grandTotal.toFixed(2);
+    };
+
+    // Populate table with items (example data)
+    const items = [
+      { id: "001", name: "Item A", quantity: 2, price: 100.0 },
+      { id: "002", name: "Item B", quantity: 1, price: 200.0 },
+    ];
+
+    items.forEach((item) => {
+      const clone = template.content.cloneNode(true);
+      const row = clone.querySelector("tr");
+
+      row.querySelector(".id").textContent = item.id;
+      row.querySelector(".name").textContent = item.name;
+      row.querySelector(".quantity input").value = item.quantity;
+      row.querySelector(".price input").value = item.price.toFixed(2);
+
+      tbody.appendChild(row);
+    });
+
+    // Add event listeners to inputs
+    tbody.addEventListener("input", (event) => {
+      if (
+        event.target.matches(".quantity input") ||
+        event.target.matches(".price input")
+      ) {
+        updateTotals();
+      }
+    });
+
+    // Print button functionality
+    const printBtn = document.getElementById("print-btn");
+    printBtn.addEventListener("click", () => {
+      window.print();
+    });
+
+    // Initial calculation
+    updateTotals();
+  });
+
   return new Promise((resolve) => {
     resolve(() => {
       // loginButton.removeEventListener("click", onLoginClick);

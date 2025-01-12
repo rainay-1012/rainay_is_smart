@@ -1,8 +1,0 @@
-GET http://localhost:5000/test
-###
-
-GET http://localhost:5000/get_metadata
-
-###
-
-GET http://localhost:5000/get_data_settings

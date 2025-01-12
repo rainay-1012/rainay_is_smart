@@ -2,211 +2,33 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import $ from "jquery";
 import "jquery-blockui";
 import "../style/custom_theme.scss";
+import { initAccount } from "./account";
 import { getCurrentUserToken, validateToken } from "./auth";
 import { initDashboard } from "./dashboard";
-import { initDeveloper } from "./dev_dashboard";
 import { initItemPage } from "./item";
-import { initLogin } from "./login";
 import { initProcurement } from "./procurement";
-import { initProfile } from "./profile";
-import { initRegister } from "./register";
+// import { initQuotation } from "./quotation";
 import { initReport } from "./report";
 import { initVendor } from "./vendor";
+/* import { initUserManual } from "./user_manual"; */
+// @ts-ignore
+import {
+  Carousel,
+  Collapse,
+  Dropdown,
+  initMDB,
+  Input,
+  Modal,
+  Offcanvas,
+  Ripple,
+} from "mdb-ui-kit";
+import { initUsers } from "./users";
+import { MessageType, showMessage, withBlock } from "./utils";
 
-export interface GeneralResponse {
-  name: string;
+export interface Response {
+  code: string;
   message: string;
-}
-
-export interface ContentResponse extends GeneralResponse {
-  code: number;
-  content: string;
-}
-
-export function assert(condition: any, message: string): asserts condition {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
-
-export function blockElement(
-  element: HTMLElement | string,
-  {
-    opacity = 1,
-    type = "border", // New field: type
-    small = false,
-    primary = true,
-    zIndex = 10000,
-  }: {
-    opacity?: number;
-    type?: "grow" | "border" | "bar"; // Accepts "grow", "border", or "bar"
-    small?: boolean;
-    primary?: boolean;
-    zIndex?: number;
-  } = {}
-) {
-  const $element = $(element as any);
-
-  // Spinner configuration
-  const spinnerSizeClass = small ? "spinner-border-sm" : "";
-  const spinnerColorClass = primary ? "text-primary" : "text-primary-emphasis";
-  const spinnerType =
-    type === "grow"
-      ? "spinner-grow"
-      : type === "border"
-      ? "spinner-border"
-      : "";
-
-  if (type === "bar") {
-    $element.addClass("container-loading-bar");
-    $element.block({
-      message: null,
-      overlayCSS: {
-        backgroundColor: "#f8f9fa",
-        opacity: opacity,
-        zIndex: zIndex - 1,
-      },
-      css: {
-        border: "none",
-        backgroundColor: "transparent",
-        cursor: "wait",
-        zIndex: zIndex,
-      },
-    });
-  } else {
-    $element.block({
-      message: `
-      <div class="${spinnerType} ${spinnerSizeClass} ${spinnerColorClass}" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>`,
-      centerX: false,
-      centerY: false,
-      overlayCSS: {
-        backgroundColor: "#f8f9fa",
-        opacity: opacity,
-        zIndex: zIndex - 1,
-      },
-      css: {
-        border: "none",
-        backgroundColor: "transparent",
-        cursor: "wait",
-        zIndex: zIndex,
-        top: `calc(50% - ${(small ? 1 : 2) / 2}rem - 0.125rem)`,
-        left: `calc(50% - ${(small ? 1 : 2) / 2}rem)`,
-        width: "auto",
-        height: "auto",
-      },
-    });
-  }
-
-  // $element.css("pointer-events", "none");
-  // $element.prop("disabled", true);
-}
-
-export function unblockElement(element: HTMLElement | string) {
-  const $element = $(element as any);
-  $element.unblock();
-  $element.removeClass("container-loading-bar");
-  $element.css("pointer-events", "auto");
-  $element.prop("disabled", false);
-}
-
-export function withBlock<T>(
-  element: HTMLElement | string,
-  blockParams: {
-    opacity?: number;
-    type?: "grow" | "border" | "bar";
-    small?: boolean;
-    primary?: boolean;
-    zIndex?: number;
-  } = {}
-): (target: (...args: any[]) => Promise<T>) => (...args: any[]) => Promise<T> {
-  // The main function to handle blocking and unblocking
-  const applyBlock = (
-    target: (...args: any[]) => Promise<T>
-  ): ((...args: any[]) => Promise<T>) => {
-    return async (...args: any[]) => {
-      try {
-        blockElement(element, blockParams);
-        return await target(...args);
-      } finally {
-        unblockElement(element);
-      }
-    };
-  };
-
-  // Return a function that wraps the target
-  return (target: (...args: any[]) => Promise<T>) => applyBlock(target);
-}
-
-export enum AlertType {
-  SUCCESS = "success",
-  DANGER = "danger",
-  WARNING = "warning",
-  INFO = "info",
-}
-
-export function showAlert(
-  alertMessage: string,
-  {
-    element = "body",
-    type = AlertType.INFO,
-    position = "prepend",
-    animated = true,
-    timeout = 5000,
-  } = {}
-) {
-  if (!Object.values(AlertType).includes(type)) {
-    console.error(`Invalid alert type: ${type}`);
-    return;
-  }
-
-  const alertDiv = document.createElement("div");
-  alertDiv.className = `alert alert-${type} alert-dismissible mb-0`;
-  if (animated) alertDiv.classList.add("show");
-
-  alertDiv.setAttribute("role", "alert");
-  alertDiv.innerHTML = `
-    ${alertMessage}
-    <button type="button" class="btn-close" aria-label="Close"></button>
-  `;
-
-  const elm = $(element);
-
-  if (position === "fixed-top") {
-    alertDiv.style.position = "fixed";
-    alertDiv.style.top = "0";
-    alertDiv.style.left = "0";
-    alertDiv.style.width = "100%";
-    alertDiv.style.zIndex = "1050";
-    elm.append(alertDiv);
-  } else {
-    elm.prepend(alertDiv);
-  }
-
-  const $alertDiv = $(alertDiv);
-
-  if (animated) {
-    $($alertDiv).slideDown(300);
-  } else {
-    $($alertDiv).show();
-  }
-
-  $alertDiv.find(".btn-close").on("click", function () {
-    if (animated) {
-      $alertDiv.slideUp(300, () => $alertDiv.remove()); // Slide up animation
-    } else {
-      $alertDiv.remove();
-    }
-  });
-
-  setTimeout(() => {
-    if (animated) {
-      $($alertDiv).slideUp(300, () => $($alertDiv).remove());
-    } else {
-      $($alertDiv).remove();
-    }
-  }, timeout);
+  [key: string]: any;
 }
 
 type InitFunction = () => Promise<any>;
@@ -223,31 +45,16 @@ export const routes = {
     path: "/",
     destination: "main",
   },
-  login: {
-    path: "/login",
+  account: {
+    path: "/account",
     destination: "main",
-    init: initLogin,
+    init: initAccount,
   },
-  register: {
-    path: "/register",
-    destination: "main",
-    init: initRegister,
-  },
-  developer: {
-    path: "/developer_dashboard",
-    destination: "main",
-    init: initDeveloper,
-  },
+
   dashboard: {
     path: "/dashboard",
     destination: "main",
     init: initDashboard,
-  },
-  profile: {
-    path: "/dashboard/profile",
-    destination: "#content",
-    parent: "dashboard",
-    init: initProfile,
   },
   procurement: {
     path: "/dashboard/procurement",
@@ -272,6 +79,17 @@ export const routes = {
     destination: "#content",
     parent: "dashboard",
     init: initReport,
+  },
+  users: {
+    path: "/dashboard/users",
+    destination: "#content",
+    parent: "dashboard",
+    init: initUsers,
+  },
+  user_manual: {
+    path: "/dashboard/user_manual",
+    destination: "main",
+/*     init: initUserManual, */
   },
 } as const satisfies Record<string, Route>;
 
@@ -330,7 +148,7 @@ async function waitForAssetsToLoad(container: JQuery<HTMLElement>) {
   await Promise.allSettled(assetPromises);
 }
 
-async function fetchContent(route: Route): Promise<ContentResponse> {
+async function fetchContent(route: Route): Promise<string> {
   try {
     const response = await fetch(route.path, {
       method: "GET",
@@ -341,21 +159,14 @@ async function fetchContent(route: Route): Promise<ContentResponse> {
     });
 
     if (!response.ok) {
-      const errorResponse: ContentResponse = await response.json();
-      return errorResponse;
+      const errorResponse: Response = await response.json();
+      throw errorResponse;
     }
 
-    const contentResponse = await response.json();
-    console.log(contentResponse);
+    const contentResponse = await response.text();
     return contentResponse;
   } catch (error) {
-    console.error(error);
-    return {
-      name: "Client Error",
-      message: "There was an issue processing the request on the client side.",
-      code: 400,
-      content: "<h1>Client Error: Invalid Request</h1>",
-    };
+    throw error;
   }
 }
 
@@ -374,7 +185,6 @@ export function updateHistoryState(
   replace: boolean,
   historyData?: {
     route: string;
-    blockParams: Record<string, unknown>;
   },
   pop?: boolean
 ) {
@@ -391,118 +201,144 @@ export function updateHistoryState(
 
 export async function navigate(
   route: Route,
-  {
-    pop = false,
-    blockParams = {},
-    replace = false,
-    alert = "",
-    alertParams = {},
-  } = {}
+  { pop = false, replace = false, alert = "", alertParams = {} } = {}
 ) {
   const curChain = getRouteChain(currentRoute);
   const destChain = getRouteChain(route);
   const commonIndex = findCommonParent(curChain, destChain);
-  const topParent = destChain[commonIndex + 1]?.destination;
 
-  await withBlock(
-    topParent,
-    blockParams
-  )(async () => {
-    try {
-      for (let i = disposers.length - 1; i > commonIndex; i--) {
-        if (disposers[i]) {
-          disposers[i]!();
-          disposers[i] = null;
-        }
-      }
-      disposers = disposers.slice(0, commonIndex + 1);
-
-      currentRoute = route;
-      for (let i = commonIndex + 1; i < destChain.length; i++) {
-        const route = destChain[i];
-        const response = await fetchContent(route);
-        await replaceContent(response.content, route.destination);
-        if (response.code >= 400) {
-          return;
-        }
-
-        if (typeof route.init === "function") {
-          disposers[i] = await route.init();
-        } else {
-          disposers[i] = null;
-        }
-      }
-
-      updateHistoryState(
-        route.path,
-        replace,
-        {
-          route: currentRoute.path,
-          blockParams: blockParams,
-        },
-        pop
-      );
-    } catch (error) {
-      console.error("Error during navigation:", error);
-    } finally {
-      if (alert) {
-        showAlert(alert, alertParams);
+  try {
+    for (let i = disposers.length - 1; i > commonIndex; i--) {
+      if (disposers[i]) {
+        disposers[i]!();
+        disposers[i] = null;
       }
     }
-  })();
+    disposers = disposers.slice(0, commonIndex + 1);
+
+    currentRoute = route;
+    for (let i = commonIndex + 1; i < destChain.length; i++) {
+      const route = destChain[i];
+      const response = await fetchContent(route);
+
+      await replaceContent(
+        new DOMParser()
+          .parseFromString(response, "text/html")!
+          .querySelector(route.destination)?.outerHTML!,
+        route.destination
+      );
+
+      if (typeof route.init === "function") {
+        disposers[i] = await route.init();
+      } else {
+        disposers[i] = null;
+      }
+    }
+
+    updateHistoryState(
+      route.path,
+      replace,
+      {
+        route: currentRoute.path,
+      },
+      pop
+    );
+  } catch (error) {
+    console.error("Error during navigation:", error);
+    await replaceContent(
+      "<h1>Unexpected error occured. Please try again</h1>",
+      route.destination
+    );
+  } finally {
+    if (alert) {
+      showMessage(alert, alertParams);
+    }
+  }
 }
 
 $(async function () {
-  window.onpopstate = async (event) => {
-    console.log("pop");
-    const state = event.state || {};
-    const { route = window.location.pathname, blockParams = {} } = state;
+  await withBlock("main", {
+    type: "grow",
+    primary: true,
+  })(async () => {
+    window.onpopstate = async (event) => {
+      console.log("pop");
+      const state = event.state || {};
+      const { route = window.location.pathname } = state;
 
-    await navigate(getRouteFromPath(route), {
-      pop: true,
-      blockParams,
-    });
-  };
+      await navigate(getRouteFromPath(route), {
+        pop: true,
+      });
+    };
 
-  let route;
-  let alert;
-  let alertParams;
+    let route;
+    let alert;
+    let alertParams;
 
-  if (window.location.pathname === "/" || window.location.pathname === "") {
-    const userToken = await getCurrentUserToken();
-    if (userToken) {
-      try {
-        const data = await validateToken(userToken);
-        route = getRouteFromPath(data.redirect);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.trace(error);
-        } else {
-          const err = error as ContentResponse;
-          route = routes.login;
-          alert = `${err.name} : ${err.message}`;
-          alertParams = {
-            type: AlertType.DANGER,
-            position: "fixed-top",
-          };
+    if (window.location.pathname === "/" || window.location.pathname === "") {
+      const userToken = await getCurrentUserToken();
+      if (userToken) {
+        try {
+          const data = await validateToken(userToken);
+          route = getRouteFromPath(data.redirect);
+        } catch (error) {
+          if (error instanceof Response) {
+            console.trace(error);
+          } else {
+            const err = error as Response;
+            route = routes.account;
+            alert = `${err.code} : ${err.message}`;
+            alertParams = {
+              type: MessageType.DANGER,
+              position: "fixed-top",
+            };
+          }
         }
+      } else {
+        route = routes.account;
       }
     } else {
-      route = routes.login;
+      route = getRouteFromPath(window.location.pathname);
     }
-  } else {
-    route = getRouteFromPath(window.location.pathname);
-  }
 
-  await navigate(route!, {
-    replace: true,
-    blockParams: {
-      grow: true,
-    },
-    alert: alert,
-    alertParams: alertParams,
-  });
+    await navigate(route!, {
+      replace: true,
+      alert: alert,
+      alertParams: alertParams,
+    });
+
+    function observeDOMChanges() {
+      const targetNode = document.body;
+
+      const observer = new MutationObserver((mutationsList, observer) => {
+        mutationsList.forEach((mutation) => {
+          if (mutation.type === "childList") {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === 1) {
+                initMDB({ Ripple, Carousel, Input });
+              }
+            });
+          }
+        });
+      });
+
+      const config = { childList: true, subtree: true };
+
+      observer.observe(targetNode, config);
+    }
+
+    observeDOMChanges();
+
+    initMDB({ Ripple, Carousel, Modal, Dropdown, Input, Offcanvas, Collapse });
+  })();
 });
+
+export const initInput = () => {
+  document.querySelectorAll(".form-outline").forEach((element) => {
+    const input = new Input(element);
+    input.update();
+  });
+};
 
 export function simulateAsyncRequest(time: number, data = null) {
   return new Promise((resolve, reject) => {

@@ -1,34 +1,35 @@
-<div
+<!-- <div
   id="content"
   class="px-4 overflow-y-auto py-3 overflow-x-hidden h-100"
 >
-<table
-id="purchase-table"
-class="table"
-style="width: 100%"
->
-<thead>
-  <tr>
-    <th></th>
-    <th>ID#</th>
-    <th>Vendor Name</th>
-    <th>Status</th>
-    <th>Update</th>
-    <th class="all">Action</th>
-  </tr>
-</thead>
-<tbody></tbody>
-</table>
+  <table
+    id="purchase-table"
+    class="table"
+    style="width: 100%"
+  >
+    <thead>
+      <tr>
+        <th></th>
+        <th>ID#</th>
+        <th>RFQ ID</th>
+        <th>Item Quantity</th>
+        <th>Total Price (RM)</th>
+        <th>Status</th>
+        <th class="all">Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<form
+  <form
     class="modal fade"
     tabindex="-1"
     id="add-new-purchase-modal"
   >
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Purchase</h5>
+          <h5 class="modal-title">New Purchase Order</h5>
           <button
             type="button"
             class="btn-close"
@@ -37,26 +38,57 @@ style="width: 100%"
           ></button>
         </div>
         <div class="modal-body">
-          <div class="col-sm-8">
+          <div
+            class="mb-3 d-flex flex-column align-items-center justify-content-center"
+          >
             <input
-              id="rfqid"
               name="id"
               type="text"
-              readonly
+              hidden
             />
-          </div> //wanted to do one drop down to select from rfq, since all the data sudah ada, just wanna get the finalised data from it
-          <div class="col-sm-8">
-          <label
-          for="rfq-list"
-          class="form-label"
-          >Purchase from:</label
-        >
-        <select
-          id="rfq-list"
-          class="mb-2 form-control"
-          autocomplete="off"
-        ></select>
-      
+            <div class="mb-3">
+              <label
+                for="itemQuantity"
+                class="form-label"
+                >Item Quantity</label
+              >
+            </div>
+            <input
+              id="itemQuantity"
+              name="quantity"
+              type="number"
+              min="1"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="itemPrice"
+              class="form-label"
+              >Total Price (RM)</label
+            >
+            <input
+              type="number"
+              min="0.01"
+              class="form-control"
+              id="itemPrice"
+              name="price"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label
+              for="status-list"
+              class="form-label"
+              >Status</label
+            >
+            <select
+              id="status-list"
+              class="mb-2 form-control"
+              autocomplete="off"
+            ></select>
+          </div>
         </div>
         <div class="modal-footer">
           <button
@@ -64,16 +96,16 @@ style="width: 100%"
             class="btn btn-secondary"
             data-bs-dismiss="modal"
           >
-            Cancel
+            Close
           </button>
           <button
             type="submit"
             class="btn btn-primary"
           >
-            Confirm
+            Save Changes
           </button>
         </div>
       </div>
     </div>
   </form>
-</div>
+</div> -->

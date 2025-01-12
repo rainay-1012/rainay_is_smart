@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Flask",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/python/app.py",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+            "jinja": true,
+            "autoStartBrowser": false
+        },
+        {
+            "name": "Run npm start",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm start",
+            "cwd": "${workspaceFolder}",
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Run Python and npm",
+            "configurations": [
+                "Python Debugger: Flask",
+                "Run npm start",
+            ]
+        }
+    ]
+}
