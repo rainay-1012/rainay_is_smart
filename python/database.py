@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from snowflake import SnowflakeGenerator
-from sqlalchemy import Column, Integer, String, Table, text
+from sqlalchemy import Column, Enum, Integer, String, Table, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, class_mapper, mapped_column
 from sqlalchemy.orm._orm_constructors import relationship
 from sqlalchemy.sql import func
@@ -145,7 +145,7 @@ class Review(BaseModel, db.Model):
 class Procurement(BaseModel, db.Model):
     __tablename__ = "procurement"
 
-    id: Mapped[str] = mapped_column(
+    id: Mapped[int] = mapped_column(
         db.String(128), primary_key=True, insert_default=lambda: next(gen)
     )
     date: Mapped[datetime] = mapped_column(
@@ -221,16 +221,26 @@ class ProcurementItem(BaseModel, db.Model):
         return data
 
 
+class RFQStatus(enum.Enum):
+    ENABLED = "enabled"
+    DISABLED = "disabled"
+    ORDERED = "ordered"
+
+
 class RFQ(BaseModel, db.Model):
     __tablename__ = "rfq"
 
-    id: Mapped[str] = mapped_column(
+    id: Mapped[int] = mapped_column(
         db.String(128), primary_key=True, insert_default=lambda: next(gen)
     )
     date: Mapped[datetime] = mapped_column(
         db.DateTime, nullable=False, server_default=func.now()
     )
+    token: Mapped[str] = mapped_column(db.String(500), nullable=False)
     response_time: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    status: Mapped[RFQStatus] = mapped_column(
+        Enum(RFQStatus), nullable=False, default=RFQStatus.ENABLED
+    )
 
     procurement_id: Mapped[str] = mapped_column(
         db.String(128), ForeignKey("procurement.id", ondelete="CASCADE"), nullable=False
@@ -247,6 +257,13 @@ class RFQ(BaseModel, db.Model):
         secondary=rfq_procurement_item,
         back_populates="rfqs",
     )
+
+    def as_dict(self):
+        data = super().as_dict()
+        vendor = getattr(self, "vendor", None)
+        data["vendor_name"] = vendor.name if vendor else None
+        data["status"] = self.status.value
+        return data
 
 
 # class Purchase(BaseModel, db.Model):

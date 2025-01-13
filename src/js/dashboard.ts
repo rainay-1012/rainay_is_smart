@@ -8,6 +8,7 @@ import { SocketDataManager } from "./socket";
 import { getUserPhotoURL } from "./users";
 import {
   assert,
+  ChatManager,
   FormValidator,
   mapToElement,
   MessageType,
@@ -27,6 +28,13 @@ async function initProfile(user: User) {
       "One of the header user field is not defined"
     );
 
+    let photoUrl =
+      user.providerData[0].providerId === "facebook.com"
+        ? user.photoURL + `?access_token=${process.env.FACEBOOK_ACCESS_TOKEN}`
+        : user.photoURL;
+
+    console.log(photoUrl);
+
     const data = {
       id: user!.uid,
       email: user!.email ?? "N/A",
@@ -34,10 +42,7 @@ async function initProfile(user: User) {
       phoneNo: user!.phoneNumber || "",
       fullname: (claims.fullname || "") as string,
       username: user!.displayName || "Unknown",
-      photo: user!.photoURL
-        ? user.photoURL +
-          `?access_token=${localStorage.getItem("profileUrlToken")}`
-        : null,
+      photo: photoUrl,
     };
 
     headerUsername.textContent = user.displayName;
@@ -212,190 +217,197 @@ async function initProfile(user: User) {
 }
 
 export async function initDashboard() {
-  authStateChangedListener(async (user) => {
-    if (!user) {
-      console.log("User is not authenticated");
-      alert(
-        "User is not authenticated or has been modified. Please login again."
-      );
-      window.location.replace("/");
-      return;
-    }
+  return new Promise<() => void>(async (resolve, reject) => {
+    let signout = false;
 
-    const userManualButton = document.getElementById("user-manual");
-
-    if (userManualButton) {
-      userManualButton.addEventListener("click", async () => {
-        await navigate(routes.user_manual, {});
-      });
-    }
-
-    const claims = (await user.getIdTokenResult()).claims;
-    const role = claims.role;
-
-    const profileDisposer = await initProfile(user);
-
-    const signoutBtn = document.querySelector("#signout-btn");
-
-    const sidebarToggler = document.querySelector("#sidebar-toggler");
-    const sidebar = document.querySelector("#sidebar");
-    const header = document.querySelector("#header");
-    const contentContainer = document.querySelector("#content-container");
-
-    assert(signoutBtn, "signoutBtn is not found in the DOM");
-    assert(sidebarToggler, "sidebarToggler is not found in the DOM");
-    assert(sidebar, "sidebar is not found in the DOM");
-    assert(header, "header is not found in the DOM");
-    assert(contentContainer, "contentContainer is not found in the DOM");
-
-    const onSignoutClick = async () => {
-      await logout();
-    };
-
-    signoutBtn.addEventListener("click", onSignoutClick);
-
-    let isOpen = false;
-
-    function toggleChat() {
-      isOpen = !isOpen;
-      sidebar!.classList.toggle("open");
-      header!.classList.toggle("open");
-      sidebarToggler!.classList.toggle("bx-menu");
-      sidebarToggler!.classList.toggle("bx-chevrons-left");
-      contentContainer!.classList.toggle("shrink");
-    }
-
-    sidebarToggler.addEventListener("click", toggleChat);
-    const mediaQuery = window.matchMedia("(min-width: 992px)");
-
-    function handleMediaQueryChange(
-      this: MediaQueryList,
-      evt: MediaQueryListEvent
-    ): void {
-      if (evt.matches && !isOpen) {
-        sidebar!.classList.add("open");
-        header!.classList.add("open");
-        sidebarToggler!.classList.remove("bx-menu");
-        sidebarToggler!.classList.add("bx-chevrons-left");
-        contentContainer!.classList.add("shrink");
-      } else {
-        sidebar!.classList.remove("open");
-        header!.classList.remove("open");
-        sidebarToggler!.classList.add("bx-menu");
-        sidebarToggler!.classList.remove("bx-chevrons-left");
-        contentContainer!.classList.remove("shrink");
+    authStateChangedListener(async (user) => {
+      if (!user) {
+        if (!signout) {
+          console.log("User is not authenticated");
+          alert(
+            "User is not authenticated or has been modified. Please login again."
+          );
+        }
+        window.location.replace("/");
+        return;
       }
-    }
 
-    mediaQuery.addEventListener("change", handleMediaQueryChange);
-    handleMediaQueryChange.call(mediaQuery, {
-      matches: mediaQuery.matches,
-      media: mediaQuery.media,
-    } as MediaQueryListEvent);
+      const userManualButton = document.getElementById("user-manual");
 
-    const barLinks = document.querySelectorAll(".bar-link");
-    const contentTitle = document.querySelector("#content-title");
+      if (userManualButton) {
+        userManualButton.addEventListener("click", async () => {
+          await navigate(routes.user_manual, {});
+        });
+      }
 
-    assert(
-      contentTitle instanceof HTMLElement,
-      "Content title undefined or not HTMLElement"
-    );
+      const claims = (await user.getIdTokenResult()).claims;
+      const role = claims.role;
 
-    const navigateLink = async (evt: Event) => {
-      evt.preventDefault();
+      const profileDisposer = await initProfile(user);
+
+      const signoutBtn = document.querySelector("#signout-btn");
+
+      const sidebarToggler = document.querySelector("#sidebar-toggler");
+      const sidebar = document.querySelector("#sidebar");
+      const header = document.querySelector("#header");
+      const contentContainer = document.querySelector("#content-container");
+
+      assert(signoutBtn, "signoutBtn is not found in the DOM");
+      assert(sidebarToggler, "sidebarToggler is not found in the DOM");
+      assert(sidebar, "sidebar is not found in the DOM");
+      assert(header, "header is not found in the DOM");
+      assert(contentContainer, "contentContainer is not found in the DOM");
+
+      const onSignoutClick = async () => {
+        signout = true;
+        await logout();
+      };
+
+      signoutBtn.addEventListener("click", onSignoutClick);
+
+      let isOpen = false;
+
+      function toggleChat() {
+        isOpen = !isOpen;
+        sidebar!.classList.toggle("open");
+        header!.classList.toggle("open");
+        sidebarToggler!.classList.toggle("bx-menu");
+        sidebarToggler!.classList.toggle("bx-chevrons-left");
+        contentContainer!.classList.toggle("shrink");
+      }
+
+      sidebarToggler.addEventListener("click", toggleChat);
+      const mediaQuery = window.matchMedia("(min-width: 992px)");
+
+      function handleMediaQueryChange(
+        this: MediaQueryList,
+        evt: MediaQueryListEvent
+      ): void {
+        if (evt.matches && !isOpen) {
+          sidebar!.classList.add("open");
+          header!.classList.add("open");
+          sidebarToggler!.classList.remove("bx-menu");
+          sidebarToggler!.classList.add("bx-chevrons-left");
+          contentContainer!.classList.add("shrink");
+        } else {
+          sidebar!.classList.remove("open");
+          header!.classList.remove("open");
+          sidebarToggler!.classList.add("bx-menu");
+          sidebarToggler!.classList.remove("bx-chevrons-left");
+          contentContainer!.classList.remove("shrink");
+        }
+      }
+
+      mediaQuery.addEventListener("change", handleMediaQueryChange);
+      // handleMediaQueryChange.call(mediaQuery, {
+      //   matches: mediaQuery.matches,
+      //   media: mediaQuery.media,
+      // } as MediaQueryListEvent);
+
+      const barLinks = document.querySelectorAll(".bar-link");
+      const contentTitle = document.querySelector("#content-title");
+
+      assert(
+        contentTitle instanceof HTMLElement,
+        "Content title undefined or not HTMLElement"
+      );
+
+      const navigateLink = async (evt: Event) => {
+        evt.preventDefault();
+
+        barLinks.forEach((link) => {
+          link.classList.remove("active");
+        });
+
+        const target = evt.currentTarget as HTMLAnchorElement;
+
+        target.classList.add("active");
+
+        await navigate(getRouteFromPath(target.pathname), {});
+
+        target.dataset.contentTitle &&
+          (contentTitle.innerHTML = target.dataset.contentTitle);
+      };
 
       barLinks.forEach((link) => {
-        link.classList.remove("active");
+        link.addEventListener("click", navigateLink);
       });
 
-      const target = evt.currentTarget as HTMLAnchorElement;
-
-      target.classList.add("active");
-
-      await navigate(getRouteFromPath(target.pathname), {});
-
-      target.dataset.contentTitle &&
-        (contentTitle.innerHTML = target.dataset.contentTitle);
-    };
-
-    barLinks.forEach((link) => {
-      link.addEventListener("click", navigateLink);
-    });
-
-    enum Role {
-      Executive = 1,
-      Manager = 2,
-      Admin = 3,
-    }
-
-    const getRoleValue = (roleString: string): Role => {
-      switch (roleString.toLowerCase()) {
-        case "admin":
-          return Role.Admin;
-        case "manager":
-          return Role.Manager;
-        case "executive":
-          return Role.Executive;
-        default:
-          throw new Error("Unknown role");
+      enum Role {
+        Executive = 1,
+        Manager = 2,
+        Admin = 3,
       }
-    };
 
-    const userRoleValue = getRoleValue(role as string);
+      const getRoleValue = (roleString: string): Role => {
+        switch (roleString.toLowerCase()) {
+          case "admin":
+            return Role.Admin;
+          case "manager":
+            return Role.Manager;
+          case "executive":
+            return Role.Executive;
+          default:
+            throw new Error("Unknown role");
+        }
+      };
 
-    const mutationCallback = (mutationsList: MutationRecord[]) => {
-      mutationsList.forEach((mutation) => {
-        if (mutation.type === "childList" || mutation.type === "attributes") {
-          const elements = document.querySelectorAll("[data-role]");
-          elements.forEach((element) => {
-            const elementRoleString = element.getAttribute("data-role");
-            if (elementRoleString) {
-              try {
-                const elementRoleValue = getRoleValue(elementRoleString);
-                if (elementRoleValue > userRoleValue) {
-                  element.remove();
+      const userRoleValue = getRoleValue(role as string);
+
+      const mutationCallback = (mutationsList: MutationRecord[]) => {
+        mutationsList.forEach((mutation) => {
+          if (mutation.type === "childList" || mutation.type === "attributes") {
+            const elements = document.querySelectorAll("[data-role]");
+            elements.forEach((element) => {
+              const elementRoleString = element.getAttribute("data-role");
+              if (elementRoleString) {
+                try {
+                  const elementRoleValue = getRoleValue(elementRoleString);
+                  if (elementRoleValue > userRoleValue) {
+                    element.remove();
+                  }
+                } catch (e) {
+                  console.error(`Invalid role attribute: ${elementRoleString}`);
                 }
-              } catch (e) {
-                console.error(`Invalid role attribute: ${elementRoleString}`);
               }
-            }
-          });
+            });
 
-          // Adjust chat initialization based on user role
-          if (userRoleValue >= Role.Manager) {
+            // Adjust chat initialization based on user role
+            if (userRoleValue >= Role.Manager) {
+            }
           }
+        });
+      };
+
+      const observerConfig = {
+        childList: true,
+        attributes: true,
+        subtree: true,
+      };
+
+      const observer = new MutationObserver(mutationCallback);
+      observer.observe(document.body, observerConfig);
+
+      if (getCurrentRoute() === routes.dashboard) {
+        await navigate(routes.vendor, {
+          replace: true,
+        });
+      }
+
+      barLinks.forEach((link) => {
+        const path = link as HTMLAnchorElement;
+
+        if (getCurrentRoute().path === path.pathname) {
+          path.dataset.contentTitle &&
+            (contentTitle.innerHTML = path.dataset.contentTitle);
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
         }
       });
-    };
 
-    const observerConfig = {
-      childList: true,
-      attributes: true,
-      subtree: true,
-    };
+      const chatManager = ChatManager.getOrCreateInstance([]);
 
-    const observer = new MutationObserver(mutationCallback);
-    observer.observe(document.body, observerConfig);
-
-    if (getCurrentRoute() === routes.dashboard) {
-      await navigate(routes.report, {
-        replace: true,
-      });
-    }
-
-    barLinks.forEach((link) => {
-      const path = link as HTMLAnchorElement;
-
-      if (getCurrentRoute().path === path.pathname) {
-        path.dataset.contentTitle &&
-          (contentTitle.innerHTML = path.dataset.contentTitle);
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
-    });
-
-    return new Promise<() => void>((resolve) => {
       resolve(async () => {
         sidebarToggler?.removeEventListener("click", toggleChat);
         mediaQuery.removeEventListener("change", handleMediaQueryChange);
@@ -407,6 +419,4 @@ export async function initDashboard() {
       });
     });
   });
-
-  return null;
 }

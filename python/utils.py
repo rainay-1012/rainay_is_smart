@@ -209,7 +209,7 @@ def init_mail(app: Flask):
             "MAIL_USE_TLS": os.environ.get("MAIL_USE_TLS", "False") == "True",
             "MAIL_USE_SSL": os.environ.get("MAIL_USE_SSL", "True") == "True",
             "MAIL_DEFAULT_SENDER": os.environ.get("MAIL_DEFAULT_SENDER"),
-            "MAIL_SUPPRESS_SEND": os.environ.get("FLASK_ENV") != "production",
+            # "MAIL_SUPPRESS_SEND": os.environ.get("FLASK_ENV") != "production",
         }
     )
     mail.init_app(app)
@@ -288,6 +288,7 @@ class SocketDataKey(Enum):
     users = Position.admin
     item = Position.executive
     procurement = Position.executive
+    rfq = Position.executive
 
 
 def emit_data_change(uid, type, data_object=None, dtype=None, data=None):

@@ -2,7 +2,7 @@
   id="content"
   class="px-4 overflow-y-auto py-3 overflow-x-hidden h-100"
 >
-  <div class="px-4 py-3">
+  <div class="py-3">
     <div class="card card-body">
       <div class="dashboard-container">
         <div class="dashboard-header">
@@ -13,10 +13,6 @@
         <hr />
         <div class="container text-center">
           <div class="row">
-            <!-- <img
-        src="/"
-        alt="Cash Deposits"
-      /> -->
             <div class="col-sm">
               <div class="card-title text-primary">
                 <strong>Registered Vendor</strong>
@@ -25,10 +21,6 @@
               <div class="card-info text-danger">10% graded &lt; 60%</div>
             </div>
             <div class="col-sm">
-              <!-- <img
-        src="https://via.placeholder.com/40"
-        alt="Invested Dividends"
-      /> -->
               <div class="card-title text-primary">
                 <strong>Quotation Made</strong>
               </div>
@@ -36,37 +28,46 @@
               <div class="card-info text-danger">Response Rate: 14.1%</div>
             </div>
             <div class="col-sm">
-              <!-- <img
-        src="https://via.placeholder.com/40"
-        alt="Capital Gains"
-      /> -->
               <div class="card-title text-primary">
                 <strong>Purchase Cycle</strong>
               </div>
               <div class="card-value h4"><strong>200</strong></div>
-              <!--how many purchase made-->
               <div class="card-info text-success">Average: 7 days</div>
             </div>
           </div>
         </div>
-        <div class="button-container justify-content-end mt-4">
-          <a
-            href="#"
-            class="button"
-            >View Complete Report</a
-          >
-        </div>
+        <div class="button-container justify-content-end mt-4"></div>
       </div>
     </div>
   </div>
+
   <div class="card card-body h-100">
     <div class="container h-100">
       <div class="row h-100 gx-5">
         <form
-          class="col-4"
+          class="col-5"
           id="chart-form"
         >
-          <div class="mb-3">Describe your desired chart</div>
+          <label
+            for="chart-select"
+            class="form-label"
+            >Choose an option:</label
+          >
+          <select
+            data-mdb-select-init
+            class="form-select form-select-lg mb-4"
+            id="chart-select"
+          >
+            <option value="vendorReviewGred">Vendor Grades Ranking</option>
+            <option value="itemCategory">Item Category Distribution</option>
+            <option value="rfqCount">RFQ Count Over Time</option>
+          </select>
+          <div class="d-flex align-items-center mb-4">
+            <hr class="flex-grow-1" />
+            <span class="mx-3">OR</span>
+            <hr class="flex-grow-1" />
+          </div>
+          <div class="mb-3 opacity-75">Describe your desired chart</div>
           <div
             data-mdb-input-init
             class="form-outline mb-3"
@@ -91,10 +92,10 @@
             Generate
           </button>
         </form>
-        <div class="col-8 card card-body h-100 d-flex">
+        <div class="col-7 card card-body h-100 d-flex">
           <div
             id="chart"
-            class="w-100 flex-grow-1"
+            class="w-100 flex-grow-1 d-flex"
           ></div>
         </div>
       </div>

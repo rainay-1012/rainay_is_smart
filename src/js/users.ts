@@ -1,21 +1,7 @@
 import { Modal } from "bootstrap";
 import DataTable from "datatables.net-bs5";
 
-import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-import "datatables.net-buttons";
-import "datatables.net-buttons-bs5";
-import "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css";
-import "datatables.net-buttons/js/buttons.html5.min.js";
-import "datatables.net-buttons/js/buttons.print.min.js";
-import "datatables.net-plugins/dataRender/ellipsis.mjs";
-import "datatables.net-plugins/dataRender/intl.mjs";
-import "datatables.net-plugins/sorting/file-size.mjs";
-import "datatables.net-plugins/type-detection/file-size.mjs";
-import "datatables.net-responsive";
-import "datatables.net-responsive-bs5";
-import "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css";
-import "datatables.net-select";
-import "dropzone/dist/dropzone.css";
+
 import Joi from "joi";
 import "jszip";
 import "pdfmake";
@@ -274,7 +260,7 @@ export async function initUsers() {
       ],
       initComplete: (settings, json) => {
         const table = settings.oInstance.api();
-        table.rows.add(Object.values(initialData)[0]).draw();
+        table.rows.add(Object.values(initialData)).draw();
 
         TableAction.attachListeners({
           selector: "tr .edit-icon",

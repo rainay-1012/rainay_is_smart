@@ -5,7 +5,7 @@ from flask import current_app as app
 from scrap_gred import assess_vendor
 from utils import check_token, emit_data_change, require_fields
 
-from python.response import ResourceNotFoundException
+from python.response import DataResponse, ResourceNotFoundException
 
 vendor_routes = Blueprint("vendor_routes", __name__)
 
@@ -17,9 +17,12 @@ def get_vendor_data():
     vendors = Vendor.query.all()
 
     data = [vendor.as_dict() for vendor in vendors]
-    return jsonify(
-        {"data": data, "categories": [category.as_dict() for category in categories]}
-    ), 200
+    return DataResponse(
+        data={
+            "data": data,
+            "categories": [category.as_dict() for category in categories],
+        }
+    ).to_response()
 
 
 @vendor_routes.route("/upsert_vendor", methods=["POST"])

@@ -11,7 +11,7 @@ from utils import (
     upload_photo,
 )
 
-from python.response import ResourceNotFoundException
+from python.response import DataResponse, ResourceNotFoundException
 
 item_routes = Blueprint("item_routes", __name__)
 
@@ -26,9 +26,12 @@ def get_item_data():
 
     data = [item.as_dict() for item in items]
     app.logger.debug(f"{g.user['email']} | Returning item data")
-    return jsonify(
-        {"data": data, "categories": [category.as_dict() for category in categories]},
-    ), 200
+    return DataResponse(
+        data={
+            "data": data,
+            "categories": [category.as_dict() for category in categories],
+        }
+    ).to_response()
 
 
 @item_routes.route("/upsert_item", methods=["POST"])
@@ -91,8 +94,9 @@ def delete_item(item_id):
         remove_photo(item.photo)
 
     db.session.delete(item)
-    db.session.commit()
+    db.session.flush()
     emit_data_change(g.user["uid"], "delete", item)
+    db.session.commit()
 
     app.logger.debug(f"{g.user['email']} | performed delete item data")
 

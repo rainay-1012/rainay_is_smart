@@ -56,14 +56,14 @@
           <i class="bi bi-bag me-3"></i>
           <span class="fw-medium ms-2 mb-1">Procurement</span>
         </a>
-        <!-- <a
+        <a
           href="/dashboard/quotation"
           data-content-title="Quotation"
           class="d-flex align-items-center text-decoration-none py-3 bar-link"
         >
           <i class="bi bi-currency-dollar me-3"></i>
           <span class="fw-medium ms-2 mb-1">Quotation</span>
-        </a> -->
+        </a>
         <a
           href="/dashboard/report"
           data-content-title="Report"
@@ -103,7 +103,7 @@
 
   <header
     id="header"
-    class="row pe-4 g-0"
+    class="row pe-4 g-0 py-3"
   >
     <div class="d-flex align-items-center col-8">
       <i
@@ -504,6 +504,15 @@
     id="content-container"
     class="w-100 h-100 overflow-hidden"
   >
+    <div
+      class="w-100 h-100 d-flex justify-content-center align-items-center position-fixed top-0"
+      style="z-index: -1"
+    >
+      <div
+        class="spinner-grow text-primary"
+        role="status"
+      ></div>
+    </div>
     <div id="content"></div>
   </div>
 

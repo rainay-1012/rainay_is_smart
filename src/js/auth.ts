@@ -246,16 +246,10 @@ export const signUpWithSocialLogin = async (socialLogin: SocialLogin) => {
 
     const userCredential = await signInWithPopup(auth, provider);
 
-    if (socialLogin === SocialLogin.Facebook) {
-      const token =
-        FacebookAuthProvider.credentialFromResult(userCredential)?.accessToken;
-      token && localStorage.setItem("profileUrlToken", token);
-    }
-
     if (getAdditionalUserInfo(userCredential)?.isNewUser) {
       const idToken = await userCredential.user.getIdToken(true);
 
-      const response = await fetch("auth/success-redirect", {
+      const response = await fetch("/create_social_user", {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },

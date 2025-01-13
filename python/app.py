@@ -21,6 +21,7 @@ from flask_socketio import SocketIO, emit, join_room
 from item_routes import item_routes
 from procurement_routes import procurement_routes
 from report_routes import report_routes
+from rfq_routes import rfq_routes
 from scrap_gred import init_scraper
 from user_routes import user_routes
 from utils import (
@@ -75,6 +76,7 @@ app.register_blueprint(vendor_routes)
 app.register_blueprint(item_routes)
 app.register_blueprint(procurement_routes)
 app.register_blueprint(report_routes)
+app.register_blueprint(rfq_routes)
 
 
 @app.route("/developer_dashboard")
@@ -119,10 +121,10 @@ def user_manual():
     return render_template("index.html", redirect_url="/dashboard/user_manual")
 
 
-# @app.route("/dashboard/quotation")
-# @on_ajax_render("quotation.html")
-# def quotation():
-#     return render_template("quotation.html", redirect_url="/dashboard/quotation")
+@app.route("/dashboard/quotation")
+@on_ajax_render("quotation.html")
+def quotation():
+    return render_template("quotation.html", redirect_url="/dashboard/quotation")
 
 
 @app.route("/dashboard/users")
@@ -191,7 +193,7 @@ def handle_connect():
 
     session.update(
         {
-            "email": g.user["email"],
+            "email": g.user["uid"],
             "role": g.user["role"],
             "keys": keys,
             "allow_keys": valid_keys,

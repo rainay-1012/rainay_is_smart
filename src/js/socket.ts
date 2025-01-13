@@ -190,10 +190,12 @@ export class SocketDataManager {
 
   public subscribe(): void {
     this.socket.on("data-change", (payload: EventPayload) => {
+      console.log("Subscribed to data change");
       const { uid, dtype, type, data } = payload;
 
       if (uid && dtype && type && data) {
         const d = JSON.parse(data);
+
         switch (type) {
           case "modify":
             if (this.dataCache[dtype]) {
@@ -237,7 +239,6 @@ export class SocketDataManager {
           );
         }
 
-        console.log(this.eventCallbacks[dtype]["change"]);
         if (
           this.eventCallbacks[dtype] &&
           this.eventCallbacks[dtype]["change"]
@@ -305,6 +306,11 @@ export class SocketDataManager {
 
   public unsubscribe(): void {
     this.socket.off("data-change");
+    this.dataKeys = [];
+    this.eventCallbacks = {};
+    this.urlMap = {};
+    this.dataCache = {};
+    console.warn("Data change unsubscribed and all resource freed");
   }
 
   public disconnect(): void {

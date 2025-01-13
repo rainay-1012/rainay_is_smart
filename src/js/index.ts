@@ -1,16 +1,31 @@
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+import "datatables.net-buttons";
+import "datatables.net-buttons-bs5";
+import "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css";
+import "datatables.net-buttons/js/buttons.html5.min.js";
+import "datatables.net-buttons/js/buttons.print.min.js";
+import "datatables.net-plugins/dataRender/ellipsis.mjs";
+import "datatables.net-plugins/dataRender/intl.mjs";
+import "datatables.net-plugins/sorting/file-size.mjs";
+import "datatables.net-plugins/type-detection/file-size.mjs";
+import "datatables.net-responsive";
+import "datatables.net-responsive-bs5";
+import "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css";
+import "datatables.net-select";
+import "dropzone/dist/dropzone.css";
 import $ from "jquery";
 import "jquery-blockui";
-import "../style/custom_theme.scss";
 import { initAccount } from "./account";
 import { getCurrentUserToken, validateToken } from "./auth";
 import { initDashboard } from "./dashboard";
 import { initItemPage } from "./item";
 import { initProcurement } from "./procurement";
 // import { initQuotation } from "./quotation";
+import "../style/custom_theme.scss";
 import { initReport } from "./report";
+import { initUserManual } from "./user_manual";
 import { initVendor } from "./vendor";
-/* import { initUserManual } from "./user_manual"; */
 // @ts-ignore
 import {
   Carousel,
@@ -22,6 +37,7 @@ import {
   Offcanvas,
   Ripple,
 } from "mdb-ui-kit";
+import { initQuotation } from "./quotation";
 import { initUsers } from "./users";
 import { MessageType, showMessage, withBlock } from "./utils";
 
@@ -74,6 +90,12 @@ export const routes = {
     parent: "dashboard",
     init: initVendor,
   },
+  quotation: {
+    path: "/dashboard/quotation",
+    destination: "#content",
+    parent: "dashboard",
+    init: initQuotation,
+  },
   report: {
     path: "/dashboard/report",
     destination: "#content",
@@ -89,7 +111,7 @@ export const routes = {
   user_manual: {
     path: "/dashboard/user_manual",
     destination: "main",
-/*     init: initUserManual, */
+    init: initUserManual,
   },
 } as const satisfies Record<string, Route>;
 
@@ -160,6 +182,7 @@ async function fetchContent(route: Route): Promise<string> {
 
     if (!response.ok) {
       const errorResponse: Response = await response.json();
+      console.log(errorResponse);
       throw errorResponse;
     }
 
@@ -208,32 +231,39 @@ export async function navigate(
   const commonIndex = findCommonParent(curChain, destChain);
 
   try {
-    for (let i = disposers.length - 1; i > commonIndex; i--) {
-      if (disposers[i]) {
-        disposers[i]!();
-        disposers[i] = null;
+    await withBlock(destChain[Math.max(0, commonIndex + 1)].destination, {
+      type: "border",
+      primary: true,
+    })(async () => {
+      for (let i = disposers.length - 1; i > commonIndex; i--) {
+        if (disposers[i]) {
+          await disposers[i]!();
+          disposers[i] = null;
+        }
       }
-    }
-    disposers = disposers.slice(0, commonIndex + 1);
+      disposers = disposers.slice(0, commonIndex + 1);
 
-    currentRoute = route;
-    for (let i = commonIndex + 1; i < destChain.length; i++) {
-      const route = destChain[i];
-      const response = await fetchContent(route);
+      currentRoute = route;
+      for (let i = commonIndex + 1; i < destChain.length; i++) {
+        const route = destChain[i];
 
-      await replaceContent(
-        new DOMParser()
-          .parseFromString(response, "text/html")!
-          .querySelector(route.destination)?.outerHTML!,
-        route.destination
-      );
+        const response = await fetchContent(route);
 
-      if (typeof route.init === "function") {
-        disposers[i] = await route.init();
-      } else {
-        disposers[i] = null;
+        await replaceContent(
+          new DOMParser()
+            .parseFromString(response, "text/html")!
+            .querySelector(route.destination)?.outerHTML!,
+          route.destination
+        );
+
+        if (typeof route.init === "function") {
+          console.log(route);
+          disposers[i] = await route.init();
+        } else {
+          disposers[i] = null;
+        }
       }
-    }
+    })();
 
     updateHistoryState(
       route.path,

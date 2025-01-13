@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -49,7 +50,9 @@ def extract_user_info(user: auth.UserRecord):
         ).strftime("%Y-%m-%d %H:%M:%S.%f")
         if user.user_metadata.creation_timestamp
         else None,
-        "photo": user.photo_url,
+        "photo": user.photo_url + f"?access_token={os.environ['FACEBOOK_ACCESS_TOKEN']}"
+        if user.provider_data[0].provider_id == "facebook.com" and user.photo_url
+        else user.photo_url,
         "email": user.email,
     }
 

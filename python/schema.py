@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr, constr
 from typing_extensions import Annotated
@@ -29,3 +29,29 @@ class UpdateUserData(BaseModel):
 
 class VerifyEmailQuery(BaseModel):
     token: str
+
+
+class PurchaseRequest(BaseModel):
+    token: str
+
+
+class RFQEmailParams(BaseModel):
+    token: str
+    internal: Optional[bool] = False
+
+
+class RFQItemSubmission(BaseModel):
+    item_id: str
+    quantity: int
+    unit_price: float
+
+
+class RFQSubmission(BaseModel):
+    token: str
+    items: list[RFQItemSubmission]
+
+
+class AddRFQRequest(BaseModel):
+    id: str
+    items: list[str]
+    vendors: list[str]

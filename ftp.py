@@ -72,7 +72,7 @@ def run_npm_build():
 
 def main():
     # Run npm build
-    # run_npm_build()
+    run_npm_build()
 
     # Connect to FTP
     ftp = FTP(FTP_HOST)
@@ -83,10 +83,10 @@ def main():
         list_files_and_folders(ftp, PUBLIC_DIR)
 
         # Upload /python directory to /public/python
-        if os.path.exists(PYTHON_DIR) and os.path.isdir(PYTHON_DIR):
-            upload_directory(ftp, PYTHON_DIR, PYTHON_PUBLIC_DIR)
-        else:
-            print(f"Directory {PYTHON_DIR} does not exist.")
+        # if os.path.exists(PYTHON_DIR) and os.path.isdir(PYTHON_DIR):
+        #     upload_directory(ftp, PYTHON_DIR, PYTHON_PUBLIC_DIR)
+        # else:
+        #     print(f"Directory {PYTHON_DIR} does not exist.")
 
         # Upload /dist directory to /public/dist
         if os.path.exists(DIST_DIR) and os.path.isdir(DIST_DIR):

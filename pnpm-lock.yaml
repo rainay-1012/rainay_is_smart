@@ -41,6 +41,9 @@ importers:
       datatables.net-responsive-bs5:
         specifier: ^3.0.3
         version: 3.0.3
+      datatables.net-rowgroup:
+        specifier: ^1.5.1
+        version: 1.5.1
       datatables.net-select:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1610,6 +1613,9 @@ packages:
 
   datatables.net-responsive@3.0.3:
     resolution: {integrity: sha512-/VU5U3P+l3GSdo92Mclt5YlrETNkfIZZU1MOk0aHNt0VqQOE0dORhx5Nwa8pYVsBuQBYzzyROZLru6UivEWv3Q==}
+
+  datatables.net-rowgroup@1.5.1:
+    resolution: {integrity: sha512-yDn+UCG9vrztt4obqt0YogyjH/i1D5Fyxnt4r5++T/ZaYhjKLU8zG9hkQXMx81M7RgeOtkv0eEpo/c+72w8T0w==}
 
   datatables.net-select@2.1.0:
     resolution: {integrity: sha512-6B1sI5pfvBen+8kySl1T0hkGoUmrw+5YGqaW4NCg+1srMw+48YV5SdWPiyCQDoev2ajBdKzHuG/wzD2INMbmJw==}
@@ -5760,6 +5766,11 @@ snapshots:
       jquery: 3.7.1
 
   datatables.net-responsive@3.0.3:
+    dependencies:
+      datatables.net: 2.2.0
+      jquery: 3.7.1
+
+  datatables.net-rowgroup@1.5.1:
     dependencies:
       datatables.net: 2.2.0
       jquery: 3.7.1

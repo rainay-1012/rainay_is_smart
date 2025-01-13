@@ -2,12 +2,10 @@ import PreloadWebpackPlugin from "@vue/preload-webpack-plugin";
 import CompressionPlugin from "compression-webpack-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import Dotenv from "dotenv-webpack";
-import fastGlob from "fast-glob";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import { createRequire } from "module";
 import path from "path";
-import { PurgeCSSPlugin } from "purgecss-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
 import { fileURLToPath } from "url";
 
@@ -23,11 +21,10 @@ const htmlTemplates = [
   "index.html",
   "account.html",
   "user_manual.html",
-  "dev_dashboard.html",
   "vendor.html",
-  "rfq.html",
+  // "rfq.html",
   "verification_email.html",
-  "company_email.html",
+  "rfq_email.html",
   "email_verified.html",
   "error.html",
   "procurement.html",
@@ -35,7 +32,6 @@ const htmlTemplates = [
   "item.html",
   "dashboard.html",
   "report.html",
-  "report_drk.html",
   "users.html",
 ];
 
@@ -73,22 +69,11 @@ const plugins = [
 
 if (isProduction) {
   plugins.push(
-    new PurgeCSSPlugin({
-      paths: fastGlob.sync(`${path.join(__dirname, "src")}/**/*`, {
-        nodir: true,
-      }),
-    }),
-    new PreloadWebpackPlugin({
-      rel: "preload",
-      as(entry) {
-        if (/\.(woff2|woff|ttf|eot)$/.test(entry)) return "font";
-        if (/\.(png|jpe?g|gif|svg|webp)$/.test(entry)) return "image";
-        return undefined;
-      },
-      includeHtmlNames: ["index.html", "error.html"],
-      include: "allAssets",
-      crossorigin: "anonymous",
-    }),
+    // new PurgeCSSPlugin({
+    //   paths: fastGlob.sync(`${path.join(__dirname, "src")}/**/*`, {
+    //     nodir: true,
+    //   }),
+    // }),
     new CompressionPlugin({
       algorithm: "brotliCompress",
     })
@@ -205,7 +190,16 @@ export default {
       new TerserPlugin({
         parallel: true,
       }),
-      new CssMinimizerPlugin(),
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            "default",
+            {
+              discardComments: { removeAll: true },
+            },
+          ],
+        },
+      }),
     ],
     splitChunks: false,
     usedExports: true,

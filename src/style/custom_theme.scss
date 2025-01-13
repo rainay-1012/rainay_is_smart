@@ -166,7 +166,7 @@ $theme-colors: (
 @import "../../node_modules/mdb-ui-kit/src/scss/mdb.free.scss";
 
 :root {
-  --dt-row-selected: 3.2, 112, 115.2;
+  --dt-row-selected: 3.2, 112, 115.2 !important;
   --bs-body-bg: var(--mdb-body-bg);
   --bs-border-color-translucent: var(--mdb-border-color-translucent);
   --bs-border-radius: var(--mdb-border-radius);

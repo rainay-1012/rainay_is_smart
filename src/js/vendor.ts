@@ -1,9 +1,7 @@
-import { Collapse } from "bootstrap";
 import DataTable from "datatables.net-bs5";
-import "dropzone/dist/dropzone.css";
 import Joi from "joi";
 import _ from "lodash";
-import { initMDB, Modal } from "mdb-ui-kit";
+import { Collapse, initMDB, Modal } from "mdb-ui-kit";
 import TomSelect from "tom-select";
 import { initInput } from ".";
 import "../style/dashboard.scss";
@@ -106,490 +104,518 @@ export const showReviews = (
 };
 
 export async function initVendor() {
-  initInput();
+  return new Promise<() => void>(async (resolve, reject) => {
+    await withBlock("#content", {
+      type: "border",
+      small: false,
+    })(async () => {
+      initInput();
 
-  const dataManager = await SocketDataManager.getOrCreateInstance({
-    vendor: "/get_vendor_data",
-  });
-  let initialData = [];
+      const dataManager = await SocketDataManager.getOrCreateInstance({
+        vendor: "/get_vendor_data",
+      });
+      let initialData = [];
 
-  initialData = dataManager.getDataCache("vendor");
+      initialData = dataManager.getDataCache("vendor");
 
-  dataManager?.subscribe();
+      dataManager?.subscribe();
 
-  dataManager?.setEventCallback(
-    "vendor",
-    "add",
-    (
-      uid: string,
-      data: any,
-      dataset: any,
-      dataType: string,
-      eventType: string
-    ) => {
-      vendorTable.row.add(data).draw();
-    }
-  );
-
-  dataManager?.setEventCallback(
-    "vendor",
-    "delete",
-    (
-      uid: string,
-      data: any,
-      dataset: any,
-      dataType: string,
-      eventType: string
-    ) => {
-      vendorTable.row(`#${data.id}`).remove().draw();
-    }
-  );
-
-  dataManager?.setEventCallback(
-    "vendor",
-    "modify",
-    (
-      uid: string,
-      data: any,
-      dataset: any,
-      dataType: string,
-      eventType: string
-    ) => {
-      let d = vendorTable.row(`#${data.id}`).data();
-      Object.assign(d, data);
-      vendorTable.row(`#${data.id}`).invalidate().draw();
-    }
-  );
-
-  dataManager?.setEventCallback(
-    "vendor",
-    "change",
-    (
-      uid: string,
-      data: any,
-      dataset: any,
-      dataType: string,
-      eventType: string
-    ) => {
-      vendorTable.responsive.recalc();
-      if (uid !== getCurrentUser()?.uid) {
-        showMessage(
-          `Data of type ${dataType} has been altered. Alter type: ${eventType}`,
-          {
-            mode: "toast",
-            position: "bottom-right",
-          }
-        );
-      }
-    }
-  );
-
-  dataManager?.setEventCallback(
-    "vendor",
-    "reconnect",
-    (
-      uid: string,
-      data: any,
-      dataset: any,
-      dataType: string,
-      eventType: string
-    ) => {
-      vendorTable.clear();
-      vendorTable.rows.add(dataset.data).draw(true);
-      vendorTable.responsive.recalc();
-      showMessage(
-        `Reconencted to server. Data of type ${dataType} has been refreshed to latest.`,
-        {
-          mode: "toast",
-          position: "bottom-right",
+      dataManager?.setEventCallback(
+        "vendor",
+        "add",
+        (
+          uid: string,
+          data: any,
+          dataset: any,
+          dataType: string,
+          eventType: string
+        ) => {
+          vendorTable.row.add(data).draw();
         }
       );
-    }
-  );
 
-  const vendorFormElm = document.querySelector("#vendor-modal");
-  // const chatManager = ChatManager.getInstance();
+      dataManager?.setEventCallback(
+        "vendor",
+        "delete",
+        (
+          uid: string,
+          data: any,
+          dataset: any,
+          dataType: string,
+          eventType: string
+        ) => {
+          vendorTable.row(`#${data.id}`).remove().draw();
+        }
+      );
 
-  assert(
-    vendorFormElm instanceof HTMLFormElement,
-    "Vendor modal undefined or not HTMLFormElement"
-  );
+      dataManager?.setEventCallback(
+        "vendor",
+        "modify",
+        (
+          uid: string,
+          data: any,
+          dataset: any,
+          dataType: string,
+          eventType: string
+        ) => {
+          let d = vendorTable.row(`#${data.id}`).data();
+          Object.assign(d, data);
+          vendorTable.row(`#${data.id}`).invalidate().draw();
+        }
+      );
 
-  const vendorForm = new Modal(vendorFormElm);
+      dataManager?.setEventCallback(
+        "vendor",
+        "change",
+        (
+          uid: string,
+          data: any,
+          dataset: any,
+          dataType: string,
+          eventType: string
+        ) => {
+          vendorTable.responsive.recalc();
+          if (uid !== getCurrentUser()?.uid) {
+            showMessage(
+              `Data of type ${dataType} has been altered. Alter type: ${eventType}`,
+              {
+                mode: "toast",
+                position: "bottom-right",
+              }
+            );
+          }
+        }
+      );
 
-  const vendorSchema = Joi.object({
-    id: Joi.string().allow("").optional(),
-    name: Joi.string().min(3).max(100).required().messages({
-      "string.empty": "Name is required",
-      "string.min": "Name must be at least 3 characters long",
-      "string.max": "Name must not exceed 100 characters",
-    }),
-    address: Joi.string().min(5).max(255).required().messages({
-      "string.empty": "Address is required",
-      "string.min": "Address must be at least 5 characters long",
-      "string.max": "Address must not exceed 255 characters",
-    }),
-    category: Joi.array()
-      .items(
-        Joi.string().required().messages({
-          "string.empty": "Each category must be a non-empty string.",
-        })
-      )
-      .min(1)
-      .required()
-      .messages({
-        "array.base": "Category must be an array.",
-        "array.min": "At least one category must be selected.",
-        "any.required": "Category is required.",
-      }),
-    email: Joi.string()
-      .email({ tlds: { allow: false } }) // Validate proper email format
-      .required()
-      .messages({
-        "string.empty": "Email is required",
-        "string.email": "Email must be a valid email address",
-      }),
-  });
+      dataManager?.setEventCallback(
+        "vendor",
+        "reconnect",
+        (
+          uid: string,
+          data: any,
+          dataset: any,
+          dataType: string,
+          eventType: string
+        ) => {
+          vendorTable.clear();
+          vendorTable.rows.add(dataset.data).draw(true);
+          vendorTable.responsive.recalc();
+          showMessage(
+            `Reconencted to server. Data of type ${dataType} has been refreshed to latest.`,
+            {
+              mode: "toast",
+              position: "bottom-right",
+            }
+          );
+        }
+      );
 
-  const vendormFormValidator = new FormValidator(vendorSchema, vendorFormElm);
+      const vendorFormElm = document.querySelector("#vendor-modal");
+      // const chatManager = ChatManager.getInstance();
 
-  vendormFormValidator.attachValidation();
+      assert(
+        vendorFormElm instanceof HTMLFormElement,
+        "Vendor modal undefined or not HTMLFormElement"
+      );
 
-  const onVendorFormSubmit = async (evt: SubmitEvent) => {
-    evt.preventDefault();
-    const data = vendormFormValidator.validateForm();
+      const vendorForm = new Modal(vendorFormElm);
 
-    if (!data) {
-      return;
-    }
+      const vendorSchema = Joi.object({
+        id: Joi.string().allow("").optional(),
+        name: Joi.string().min(3).max(100).required().messages({
+          "string.empty": "Name is required",
+          "string.min": "Name must be at least 3 characters long",
+          "string.max": "Name must not exceed 100 characters",
+        }),
+        address: Joi.string().min(5).max(255).required().messages({
+          "string.empty": "Address is required",
+          "string.min": "Address must be at least 5 characters long",
+          "string.max": "Address must not exceed 255 characters",
+        }),
+        category: Joi.array()
+          .items(
+            Joi.string().required().messages({
+              "string.empty": "Each category must be a non-empty string.",
+            })
+          )
+          .min(1)
+          .required()
+          .messages({
+            "array.base": "Category must be an array.",
+            "array.min": "At least one category must be selected.",
+            "any.required": "Category is required.",
+          }),
+        email: Joi.string()
+          .email({ tlds: { allow: false } }) // Validate proper email format
+          .required()
+          .messages({
+            "string.empty": "Email is required",
+            "string.email": "Email must be a valid email address",
+          }),
+      });
 
-    await withBlock("#vendor-modal .modal-content", {
-      opacity: 0.5,
-      primary: true,
-    })(async () => {
-      try {
-        const response = await fetch("/upsert_vendor", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${await getCurrentUserToken()}`,
-          },
-          method: "POST",
-          body: JSON.stringify(data),
-        });
+      const vendormFormValidator = new FormValidator(
+        vendorSchema,
+        vendorFormElm
+      );
 
-        if (!response.ok) {
-          throw await response.json();
+      vendormFormValidator.attachValidation();
+
+      const onVendorFormSubmit = async (evt: SubmitEvent) => {
+        evt.preventDefault();
+        const data = vendormFormValidator.validateForm();
+
+        if (!data) {
+          return;
         }
 
-        showMessage(`Vendor successfully ${data.id ? "modified" : "added"}.`, {
-          type: MessageType.SUCCESS,
-          element: "#content-container",
-        });
-      } catch (e: any) {
-        showMessage(e.message, {
-          type: MessageType.DANGER,
-          element: "#content-container",
-        });
-      } finally {
-        vendorForm.hide();
-      }
-    })();
-  };
+        await withBlock("#vendor-modal .modal-content", {
+          opacity: 0.5,
+          primary: true,
+        })(async () => {
+          try {
+            const response = await fetch("/upsert_vendor", {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${await getCurrentUserToken()}`,
+              },
+              method: "POST",
+              body: JSON.stringify(data),
+            });
 
-  vendorFormElm.addEventListener("submit", onVendorFormSubmit);
+            if (!response.ok) {
+              throw await response.json();
+            }
 
-  const onVendorFormHide = () => {
-    vendormFormValidator.resetForm();
-    categorySelect.clear();
-  };
+            showMessage(
+              `Vendor successfully ${data.id ? "modified" : "added"}.`,
+              {
+                type: MessageType.SUCCESS,
+                element: "#content-container",
+              }
+            );
+          } catch (e: any) {
+            showMessage(e.message, {
+              type: MessageType.DANGER,
+              element: "#content-container",
+            });
+          } finally {
+            vendorForm.hide();
+          }
+        })();
+      };
 
-  vendorFormElm.addEventListener("hide.mdb.modal", onVendorFormHide);
+      vendorFormElm.addEventListener("submit", onVendorFormSubmit);
 
-  const categorySelect = new TomSelect("#category-list", {
-    placeholder: "Select an category",
-    sortField: "name",
-    maxItems: 3,
-    valueField: "id",
-    labelField: "name",
-    searchField: ["name", "id"],
-    options: initialData.categories,
-    hidePlaceholder: true,
-    onItemAdd: function () {
-      (this as any).setTextboxValue("");
-      (this as any).refreshOptions();
-    },
-    render: {
-      option: function (data: any) {
-        const div = document.createElement("div");
-        div.className = "d-flex align-items-center";
+      const onVendorFormHide = () => {
+        vendormFormValidator.resetForm();
+        categorySelect.clear();
+      };
 
-        const span = document.createElement("span");
-        span.className = "flex-grow-1";
-        span.innerHTML = decodeHtml(data.name);
-        div.append(span);
+      vendorFormElm.addEventListener("hide.mdb.modal", onVendorFormHide);
 
-        const a = document.createElement("a");
-        a.innerText = `#${data.id}`;
-        a.className = "badge badge-light";
-        div.append(a);
+      const categorySelect = new TomSelect("#category-list", {
+        placeholder: "Select an category",
+        sortField: "name",
+        maxItems: 3,
+        valueField: "id",
+        labelField: "name",
+        searchField: ["name", "id"],
+        options: initialData.categories,
+        hidePlaceholder: true,
+        onItemAdd: function () {
+          (this as any).setTextboxValue("");
+          (this as any).refreshOptions();
+        },
+        render: {
+          option: function (data: any) {
+            const div = document.createElement("div");
+            div.className = "d-flex align-items-center";
 
-        return div;
-      },
-    },
-  });
+            const span = document.createElement("span");
+            span.className = "flex-grow-1";
+            span.innerHTML = decodeHtml(data.name);
+            div.append(span);
 
-  const reviewModal = new Modal("#review-modal");
-  const reviewList = document.getElementById("review-list");
-  const reviewTemplate = document.getElementById("review-template");
+            const a = document.createElement("a");
+            a.innerText = `#${data.id}`;
+            a.className = "badge badge-light";
+            div.append(a);
 
-  assert(
-    reviewList instanceof HTMLElement &&
-      reviewTemplate instanceof HTMLTemplateElement,
-    "Review list or template undefined or not HTMLElement/HTMLTemplateElement"
-  );
+            return div;
+          },
+        },
+      });
 
-  const vendorTableElm = document.querySelector("#vendor-table");
+      const reviewModal = new Modal("#review-modal");
+      const reviewList = document.getElementById("review-list");
+      const reviewTemplate = document.getElementById("review-template");
 
-  assert(
-    vendorTableElm instanceof HTMLElement,
-    "Vendor table undefined or invalid type"
-  );
+      assert(
+        reviewList instanceof HTMLElement &&
+          reviewTemplate instanceof HTMLTemplateElement,
+        "Review list or template undefined or not HTMLElement/HTMLTemplateElement"
+      );
 
-  $.fn.dataTable.Buttons.defaults.dom?.button?.className &&
-    ($.fn.dataTable.Buttons.defaults.dom.button.className = "btn");
+      const vendorTableElm = document.querySelector("#vendor-table");
 
-  const vendorTable = new DataTable(vendorTableElm, {
-    rowId: "id",
-    layout: {
-      topStart: {
-        buttons: [
-          TableAction.generateExportButtonConfig({ columns: [1, 3, 4, 5] }),
+      assert(
+        vendorTableElm instanceof HTMLElement,
+        "Vendor table undefined or invalid type"
+      );
+
+      $.fn.dataTable.Buttons.defaults.dom?.button?.className &&
+        ($.fn.dataTable.Buttons.defaults.dom.button.className = "btn");
+
+      const vendorTable = new DataTable(vendorTableElm, {
+        rowId: "id",
+        layout: {
+          topStart: {
+            buttons: [
+              TableAction.generateExportButtonConfig({ columns: [1, 3, 4, 5] }),
+              {
+                text: `<i class="bi bi-box-arrow-in-up-right fw-bold me-2"></i>Consult`,
+                className: "btn btn-light",
+                action: async function () {
+                  const data = vendorTable
+                    .rows({ selected: true })
+                    .data()
+                    .toArray();
+                  if (!data || data.length === 0) {
+                    return;
+                  }
+
+                  chatManager.setData(
+                    {
+                      table: data.map((row) => {
+                        return _.omit(row, ["reviews"]);
+                      }),
+                    },
+                    "Vendor Table Selected Data"
+                  );
+                  vendorTable.buttons.info(
+                    "Attached to chat",
+                    "Data has been sent to chatbot",
+                    1500
+                  );
+                },
+              },
+            ],
+          },
+          topEnd: {
+            buttons: [
+              {
+                text: `<i class="bi bi-plus-lg fw-bold me-2"></i>Add new vendor`,
+                className: "btn btn-primary",
+                action: function () {
+                  mapToElement([
+                    { selector: ".modal-title", value: "Add Vendor" },
+                  ]);
+                  vendorForm.show();
+                },
+              },
+            ],
+          },
+        },
+        select: {
+          style: "multi",
+          selector: "td:not(:last-child)",
+        },
+        scrollCollapse: true,
+        order: [[2, "asc"]],
+        processing: true,
+        serverSide: false,
+        responsive: {
+          details: {
+            type: "column",
+          },
+        },
+        paging: true,
+        pageLength: 5,
+        lengthChange: false,
+        searching: true,
+        ordering: true,
+        columns: [
           {
-            text: `<i class="bi bi-box-arrow-in-up-right fw-bold me-2"></i>Consult`,
-            className: "btn btn-light",
-            action: async function () {
-              const data = vendorTable
-                .rows({ selected: true })
-                .data()
-                .toArray();
-              if (!data || data.length === 0) {
-                return;
+            data: null,
+            orderable: false,
+            className: "dtr-control",
+            defaultContent: "",
+          },
+          {
+            data: null,
+            orderable: false,
+            render: DataTable.render.select(),
+          },
+          {
+            data: "id",
+            title: "ID",
+            // @ts-ignore
+            render: DataTable.render.ellipsis(10, true),
+          },
+          { data: "name", title: "Name" },
+          {
+            data: "categories",
+            title: "Category",
+            orderable: false,
+            render: function (data: any, _, row) {
+              return data
+                .map(function (category: string) {
+                  return `<div class="badge bg-primary d-block mb-1 py-2" style="width: min-content;">&nbsp;${category}&nbsp;</div>`;
+                })
+                .join("");
+            },
+          },
+          { data: "email", title: "Email" },
+          {
+            data: "address",
+            title: "Address",
+            // @ts-ignore
+            render: DataTable.render.ellipsis(20, true),
+          },
+          {
+            data: "gred",
+            title: "Gred",
+            orderable: false,
+            render: function (gred: number) {
+              let colorClass = "text-success pointer-cursor";
+              if (!gred || gred < 0) {
+                colorClass = "text-secondary";
+              } else if (gred <= 33) {
+                colorClass = "text-danger pointer-cursor";
+              } else if (gred <= 66) {
+                colorClass = "text-warning pointer-cursor";
               }
 
-              chatManager.setData(
-                {
-                  table: data.map((row) => {
-                    return _.omit(row, ["reviews"]);
-                  }),
-                },
-                "Vendor Table Selected Data"
-              );
-              vendorTable.buttons.info(
-                "Attached to chat",
-                "Data has been sent to chatbot",
-                1500
-              );
+              return `<i class="bi bi-circle-fill gred-icon ${colorClass}"></i>`;
+            },
+          },
+          {
+            data: null,
+            title: "Action",
+            orderable: false,
+            render: function (data: any) {
+              const approvalIcon = `<i role="button" class="bi bi-check-circle ${
+                data.approved ? "text-success pe-none" : ""
+              } approval-icon"></i>`;
+
+              return `${TableAction.generateActionHTML({
+                type: "edit",
+                className: "edit-icon",
+              })} ${TableAction.generateActionHTML({
+                type: "delete",
+                className: "delete-icon",
+              })} ${approvalIcon}`;
             },
           },
         ],
-      },
-      topEnd: {
-        buttons: [
-          {
-            text: `<i class="bi bi-plus-lg fw-bold me-2"></i>Add new vendor`,
-            className: "btn btn-primary",
-            action: function () {
-              mapToElement([{ selector: ".modal-title", value: "Add Vendor" }]);
+        initComplete: (settings, json) => {
+          const table = settings.oInstance.api();
+          table.rows.add(initialData.data).draw();
+          table.responsive.recalc();
+
+          TableAction.attachListeners({
+            selector: "tr .gred-icon",
+            table: table,
+            callback(this, event, d) {
+              showReviews(d, reviewTemplate, reviewList);
+              reviewModal.show();
+            },
+          });
+
+          TableAction.attachListeners({
+            selector: "tr .edit-icon",
+            table: table,
+            callback(this, event, d) {
+              console.log(d);
+              mapToElement([
+                { selector: "#vendor-modal input[name='id']", value: d.id },
+                { selector: "#vendor-modal input[name='name']", value: d.name },
+                {
+                  selector: "#vendor-modal input[name='email']",
+                  value: d.email,
+                },
+                {
+                  selector: "#vendor-modal input[name='address']",
+                  value: d.address,
+                },
+                {
+                  selector: "#vendor-modal .modal-title",
+                  value: "Edit Vendor",
+                },
+              ]);
+
+              categorySelect.setValue(
+                _.map(d.categories, (categoryName) => {
+                  const category = _.find(initialData.categories, {
+                    name: categoryName,
+                  });
+                  return category ? category.id : null;
+                })
+              );
               vendorForm.show();
             },
-          },
-        ],
-      },
-    },
-    select: {
-      style: "multi",
-      selector: "td:not(:last-child)",
-    },
-    scrollCollapse: true,
-    order: [[2, "asc"]],
-    processing: true,
-    serverSide: false,
-    responsive: {
-      details: {
-        type: "column",
-      },
-    },
-    paging: true,
-    pageLength: 5,
-    lengthChange: false,
-    searching: true,
-    ordering: true,
-    columns: [
-      {
-        data: null,
-        orderable: false,
-        className: "dtr-control",
-        defaultContent: "",
-      },
-      {
-        data: null,
-        orderable: false,
-        render: DataTable.render.select(),
-      },
-      {
-        data: "id",
-        title: "ID",
-        // @ts-ignore
-        render: DataTable.render.ellipsis(10, true),
-      },
-      { data: "name", title: "Name" },
-      {
-        data: "categories",
-        title: "Category",
-        orderable: false,
-        render: function (data: any, _, row) {
-          return data
-            .map(function (category: string) {
-              return `<div class="badge bg-primary d-block mb-1 py-2" style="width: min-content;">&nbsp;${category}&nbsp;</div>`;
-            })
-            .join("");
-        },
-      },
-      { data: "email", title: "Email" },
-      {
-        data: "address",
-        title: "Address",
-        // @ts-ignore
-        render: DataTable.render.ellipsis(20, true),
-      },
-      {
-        data: "gred",
-        title: "Gred",
-        orderable: false,
-        render: function (gred: number) {
-          let colorClass = "text-success pointer-cursor";
-          if (!gred || gred < 0) {
-            colorClass = "text-secondary";
-          } else if (gred <= 33) {
-            colorClass = "text-danger pointer-cursor";
-          } else if (gred <= 66) {
-            colorClass = "text-warning pointer-cursor";
-          }
+          });
 
-          return `<i class="bi bi-circle-fill gred-icon ${colorClass}"></i>`;
-        },
-      },
-      {
-        data: null,
-        title: "Action",
-        orderable: false,
-        render: function (data: any) {
-          const approvalIcon = `<i role="button" class="bi bi-check-circle ${
-            data.approved ? "text-success pe-none" : ""
-          } approval-icon"></i>`;
-
-          return `${TableAction.generateActionHTML({
-            type: "edit",
-            className: "edit-icon",
-          })} ${TableAction.generateActionHTML({
-            type: "delete",
-            className: "delete-icon",
-          })} ${approvalIcon}`;
-        },
-      },
-    ],
-    initComplete: (settings, json) => {
-      const table = settings.oInstance.api();
-      table.rows.add(initialData.data).draw();
-      table.responsive.recalc();
-
-      TableAction.attachListeners({
-        selector: "tr .gred-icon",
-        table: table,
-        callback(this, event, d) {
-          showReviews(d, reviewTemplate, reviewList);
-          reviewModal.show();
-        },
-      });
-
-      TableAction.attachListeners({
-        selector: "tr .edit-icon",
-        table: table,
-        callback(this, event, d) {
-          mapToElement([
-            { selector: "#vendor-modal input[name='id']", value: d.id },
-            { selector: "#vendor-modal input[name='name']", value: d.name },
-            { selector: "#vendor-modal input[name='email']", value: d.email },
-            {
-              selector: "#vendor-modal input[name='address']",
-              value: d.address,
+          TableAction.attachListeners({
+            selector: "tr .approval-icon",
+            table: table,
+            callback: async function (this: HTMLElement, event, d) {
+              const apiRequestCallback = TableAction.createApiRequestCallback({
+                message: "Are you sure you want to approve this vendor?",
+                url: `/approve_vendor/${d.id}`,
+                token: (await getCurrentUserToken())!,
+              });
+              await apiRequestCallback();
             },
-            { selector: "#vendor-modal .modal-title", value: "Edit Vendor" },
-          ]);
-          categorySelect.setValue(d.categories);
-          vendorForm.show();
-        },
-      });
-
-      TableAction.attachListeners({
-        selector: "tr .approval-icon",
-        table: table,
-        callback: async function (this: HTMLElement, event, d) {
-          const apiRequestCallback = TableAction.createApiRequestCallback({
-            message: "Are you sure you want to approve this vendor?",
-            url: `/approve_vendor/${d.id}`,
-            token: (await getCurrentUserToken())!,
           });
-          await apiRequestCallback();
-        },
-      });
 
-      TableAction.attachListeners({
-        selector: "tr .delete-icon",
-        table: table,
-        callback: async function (this: HTMLElement, event, d) {
-          const apiRequestCallback = TableAction.createApiRequestCallback({
-            message: "Are you sure you want to delete this vendor?",
-            url: `/delete_vendor/${d.id}`,
-            method: "DELETE",
-            token: (await getCurrentUserToken())!,
+          TableAction.attachListeners({
+            selector: "tr .delete-icon",
+            table: table,
+            callback: async function (this: HTMLElement, event, d) {
+              const apiRequestCallback = TableAction.createApiRequestCallback({
+                message: "Are you sure you want to delete this vendor?",
+                url: `/delete_vendor/${d.id}`,
+                method: "DELETE",
+                token: (await getCurrentUserToken())!,
+              });
+              await apiRequestCallback();
+            },
           });
-          await apiRequestCallback();
-        },
-      });
 
-      const searchBox = document.querySelector("#searchbox");
-      if (searchBox) {
-        searchBox.addEventListener("input", function (evt) {
-          const inputElement = evt.target;
-          if (inputElement instanceof HTMLInputElement) {
-            vendorTable.search(inputElement.value).draw();
+          const searchBox = document.querySelector("#searchbox");
+          if (searchBox) {
+            searchBox.addEventListener("input", function (evt) {
+              const inputElement = evt.target;
+              if (inputElement instanceof HTMLInputElement) {
+                vendorTable.search(inputElement.value).draw();
+              }
+            });
+          } else {
+            console.error("Search box not found in the DOM.");
           }
-        });
-      } else {
-        console.error("Search box not found in the DOM.");
-      }
-    },
-  });
+        },
+      });
 
-  const chatManager = ChatManager.getOrCreateInstance([
-    {
-      type: "table",
-      tableId: "vendor-table",
-      title: "Select vendors with top 10 gred",
-      topN: 10,
-      sort: { gred: "desc" },
-    } as TableSuggestion,
-  ]);
+      const chatManager = ChatManager.getOrCreateInstance([
+        {
+          type: "table",
+          tableId: "vendor-table",
+          title: "Select vendors with top 10 gred",
+          topN: 10,
+          sort: { gred: "desc" },
+        } as TableSuggestion,
+      ]);
 
-  return new Promise((resolve) => {
-    resolve(() => {
-      vendorForm.dispose();
-      vendorFormElm.removeEventListener("submit", onVendorFormSubmit);
-      vendorFormElm.removeEventListener("hide.mdb.modal", onVendorFormHide);
-      dataManager?.unsubscribe();
-      vendormFormValidator.dispose();
-      vendorTable.destroy();
-    });
+      resolve(() => {
+        vendorForm.dispose();
+        vendorFormElm.removeEventListener("submit", onVendorFormSubmit);
+        vendorFormElm.removeEventListener("hide.mdb.modal", onVendorFormHide);
+        dataManager.unsubscribe();
+        vendormFormValidator.dispose();
+        vendorTable.destroy();
+      });
+    })();
   });
 }

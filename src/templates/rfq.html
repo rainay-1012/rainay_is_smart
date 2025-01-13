@@ -1,267 +1,556 @@
-<main class="d-flex justify-content-center w-100">
-  <div class="card shadow-sm mb-sm-3 mt-5 w-75">
-    <div class="card-header bg-primary-subtle p-4">
+<!DOCTYPE html>
+<html class="h-100">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="X-UA-Compatible"
+      content="IE=edge"
+    />
+    <link
+      rel="icon"
+      href="https://i.imgur.com/59aGJiC.png"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @media print {
+        .d-none-print {
+          display: none !important;
+        }
+
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        html,
+        body {
+          width: 210mm;
+          height: 282mm;
+          font-size: 11px;
+          background: #fff;
+          overflow: visible;
+        }
+        body {
+          padding-top: 15mm;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        input[type="number"] {
+          -moz-appearance: textfield;
+          border: none;
+        }
+      }
+    </style>
+    <title>View RFQ</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+  </head>
+  <body>
+    <main class="d-flex justify-content-center w-100">
+      <div class="card shadow-2-strong mb-sm-3 mt-5 w-75">
+        <div class="card-header bg-primary-subtle p-4">
+          <div
+            class="text-light position-absolute fw-bold fs-4 d-flex align-items-center overflow-hidden"
+            style="top: calc((56.58px / 2) * -1); width: max-content"
+          >
+            <div
+              class="rounded-3 bg-primary ps-3 py-2 pe-3 d-flex align-items-center"
+            >
+              <img
+                class="overflow-hidden me-2"
+                src="https://i.imgur.com/59aGJiC.png"
+                height="30"
+              />
+              <div>Vendosync</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 d-flex justify-content-between my-2">
+              <div class="fs-5 fw-bold text-primary">Request For Quote</div>
+              <div>
+                <span class="me-4">
+                  <span class="fw-medium">Date: </span
+                  ><span id="date">{{ rfq.date }}</span></span
+                >
+                <span
+                  ><span class="fw-medium">RFQ ID: </span
+                  ><span id="rfq-id">{{ rfq.rfq_id }}</span></span
+                >
+              </div>
+            </div>
+            <hr />
+
+            <div class="col-7">
+              <div class="fw-bold fs- text-primary col-7">
+                <div class="card bg-secondary text-white">
+                  <div class="card-header bg-transparent">To:</div>
+                  <div
+                    class="card-body"
+                    id="vendor-name"
+                  >
+                    {{ rfq.vendor }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-5 d-flex flex-column">
+              <div class="ms-auto mt-auto">
+                <div class="d-flex align-items-center mb-2">
+                  <div
+                    class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-2"
+                    style="width: 30px; height: 30px"
+                  >
+                    <i class="bi bi-building text-light"></i>
+                  </div>
+                  <span>123, Universiti Utara Malaysia, 06010, Kedah</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                  <div
+                    class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-2"
+                    style="width: 30px; height: 30px"
+                  >
+                    <i class="bi bi-telephone text-light"></i>
+                  </div>
+                  <span>+(60)12-3456789</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <div
+                    class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-2"
+                    style="width: 30px; height: 30px"
+                  >
+                    <i class="bi bi-envelope text-light"></i>
+                  </div>
+                  <span>enquiry_vendosync@gmail.com</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <form class="card-body">
+          <div
+            class="d-flex justify-content-between align-items-center d-none-print"
+          >
+            <span class="d-none-print">Confirm</span>
+            <div
+              id="change"
+              class="text-muted text-end small text-decoration-underline d-none-print"
+            >
+              All changes are saved
+            </div>
+          </div>
+          <table
+            id="rfqTable"
+            class="table table-borderless"
+          >
+            <thead>
+              <tr class="border-bottom text-center">
+                <th style="width: 10%">Item ID</th>
+                <th style="width: 40%">Item Name</th>
+                <th style="width: 15%">Quantity</th>
+                <th style="width: 15%">Unit Price</th>
+                <th style="width: 20%">Subtotal Amount (RM)</th>
+              </tr>
+            </thead>
+            <tbody class="text-center">
+              {% for item in rfq.item_list %}
+              <tr>
+                <td class="id">{{ item.item_id }}</td>
+                <td class="name">{{ item.item_name }}</td>
+                <td class="quantity">
+                  <input
+                    class="form-control text-center"
+                    type="number"
+                    min="1"
+                    value="{{ item.quantity }}"
+                    {% if not user or rfq.status == 'disabled' or rfq.status == 'ordered' %}disabled{% endif %}
+                  />
+                </td>
+                <td class="price">
+                  <div>
+                    <input
+                      class="form-control text-center"
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value="{{ item.unit_price if item.unit_price else '' }}"
+                      {% if not user or rfq.status == 'disabled' or rfq.status == 'ordered' %}disabled{% endif %}
+                    />
+                  </div>
+                </td>
+                <td class="total">
+                  {{ "%.2f"|format(item.unit_price * item.quantity) if
+                  item.unit_price else "N/A" }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot class="fw-bold border-top">
+              <tr>
+                <td colspan="4">Total (RM)</td>
+                <td
+                  class="text-center"
+                  id="total"
+                >
+                  {{ "%.2f"|format(rfq.total) }}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="d-flex align-items-center justify-content-start">
+            <div class="me-auto d-none-print">
+              This quotation should be submitted within <b>1 week</b> from the
+              <b>date of this quotation issuance</b>.<span
+                class="link-primary link-underline text-decoration-underline mx-1"
+                data-mdb-modal-init
+                data-mdb-target="#tnc"
+                style="cursor: pointer"
+                >Terms & Conditions</span
+              >
+            </div>
+            {% if user %}
+            <button
+              type="button"
+              class="btn btn-primary me-1 d-none-print"
+              onclick="submitResponse('{{ token }}')"
+              {% if rfq.status == 'ordered' or rfq.status == 'disabled' %}disabled{% endif %}
+            >
+              Submit
+            </button>
+          {% else %}
+            <button
+              type="button"
+              class="btn btn-primary me-1 d-none-print"
+              onclick="submitOrder('{{ token }}')"
+              {% if rfq.status == 'ordered' or rfq.status == 'disabled' %}disabled{% endif %}
+            >
+              Order
+            </button>
+          {% endif %}
+            <button
+              id="print-btn"
+              type="button"
+              class="btn btn-primary d-none-print"
+            >
+              Print
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Terms & Conditions Modal -->
       <div
-        class="text-light position-absolute fw-bold fs-4 d-flex align-items-center overflow-hidden"
-        style="top: calc((56.58px / 2) * -1); width: max-content"
+        class="modal fade d-none-print"
+        id="tnc"
+        tabindex="-1"
+        aria-hidden="true"
       >
-        <div
-          class="rounded-3 bg-primary ps-3 py-2 pe-3 d-flex align-items-center"
-        >
-          <img
-            class="overflow-hidden me-2"
-            src="<%= require('../assets/logo only.svg') %>"
-            height="30"
-          />
-          <div>Vendosync</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-12 d-flex justify-content-between my-2">
-          <div class="fs-5 fw-bold text-primary">Request For Quote</div>
-          <div>
-            <span class="me-4">
-              <span class="fw-medium">Date: </span
-              ><span id="date">12 Nov 2024</span></span
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1
+                class="modal-title fs-5"
+                id="tncModalLabel"
+              >
+                Terms & Conditions
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-mdb-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div
+              class="modal-body overflow-y-auto"
+              style="height: 70vh"
             >
-            <span
-              ><span class="fw-medium">RFQ ID: </span
-              ><span id="rfq-id">12345</span></span
-            >
+              <ol>
+                <li>
+                  Suppliers may amend or withdraw their quotations prior to the
+                  submission deadline, provided <b>written notification</b> is
+                  submitted to the buyer in advance.
+                </li>
+                <li>
+                  Prices must be quoted as either inclusive or exclusive of
+                  taxes, duties, and other applicable charges, as specified in
+                  the Request for Quotation ("RFQ").
+                </li>
+                <li>
+                  Any additional costs must be itemised and supported with a
+                  detailed justification.
+                </li>
+                <li>
+                  Suppliers are
+                  <b>required to indicate applicable payment terms</b>, such as
+                  payment within 30 days following delivery and acceptance or
+                  any advance payment arrangements.
+                </li>
+                <li>
+                  Any <b>warranties or guarantees</b> associated with the quoted
+                  products or services must be clearly stated.
+                </li>
+                <li>
+                  The buyer, Vendosync, <b>reserves the right</b> to reject any
+                  or all quotations at its sole discretion without providing a
+                  justification.
+                </li>
+                <li>
+                  All information exchanged during the RFQ and quotation process
+                  must remain strictly <b>confidential</b> and shall not be
+                  disclosed to third parties without prior written consent from
+                  the buyer.
+                </li>
+                <li>
+                  Any disputes arising from this RFQ process shall be resolved
+                  in accordance with the applicable laws and jurisdiction
+                  specified in the RFQ.
+                </li>
+                <li>
+                  Quotations must be signed by a duly authorised representative
+                  of the supplier to be considered valid.
+                </li>
+                <li>
+                  Quotations must strictly adhere to the technical and
+                  functional specifications outlined in the RFQ. Any deviations
+                  must be explicitly identified and justified.
+                </li>
+                <li>
+                  Submitted quotations, along with any accompanying
+                  documentation, shall become the property of Vendosync and will
+                  not be returned to the supplier.
+                </li>
+              </ol>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-mdb-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
-        <hr />
+      </div>
+    </main>
 
-        <div class="col-7">
-          <div class="fw-bold fs- text-primary col-7">
-            <div class="card bg-secondary text-white">
-              <div class="card-header bg-transparent">To:</div>
-              <div
-                class="card-body"
-                id="vendor-name"
-              >
-                Stackbuck
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-5 d-flex flex-column">
-          <div class="ms-auto mt-auto">
-            <div class="d-flex align-items-center mb-2">
-              <div
-                class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-2"
-                style="width: 30px; height: 30px"
-              >
-                <i class="bi bi-building text-light"></i>
-              </div>
-              <span>123, Universiti Utara Malaysia, 06010, Kedah</span>
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <div
-                class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-2"
-                style="width: 30px; height: 30px"
-              >
-                <i class="bi bi-telephone text-light"></i>
-              </div>
-              <span>+(60)12-3456789</span>
-            </div>
-            <div class="d-flex align-items-center">
-              <div
-                class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-2"
-                style="width: 30px; height: 30px"
-              >
-                <i class="bi bi-envelope text-light"></i>
-              </div>
-              <span>enquiry_vendosync@gmail.com</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <form class="card-body">
-      <div
-        class="d-flex justify-content-between align-items-center d-none-print"
-      >
-        <span class="d-none-print">Confirm</span>
-        <div
-          id="change"
-          class="text-muted text-end small text-decoration-underline d-none-print"
-        >
-          All changes are saved
-        </div>
-      </div>
-      <table
-        id="rfqTable"
-        class="table table-borderless"
-      >
-        <thead>
-          <tr class="border-bottom text-center">
-            <th style="width: 10%">Item ID</th>
-            <th style="width: 40%">Item Name</th>
-            <th style="width: 15%">Quantity</th>
-            <th style="width: 15%">Unit Price</th>
-            <th style="width: 20%">Subtotal Amount (RM)</th>
-          </tr>
-        </thead>
-        <tbody class="text-center"></tbody>
-        <tfoot class="fw-bold border-top">
-          <tr>
-            <td colspan="4">Total (RM)</td>
-            <td
-              class="text-center"
-              id="total"
-            >
-              800
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-      <div class="d-flex align-items-center justify-content-start">
-        <div class="me-auto d-none-print">
-          This quotation should be submitted within <b>1 week</b> from the
-          <b>date of this quotation issuance</b>.<span
-            class="link-primary link-underline text-decoration-underline mx-1"
-            data-bs-toggle="modal"
-            data-bs-target="#tnc"
-            style="cursor: pointer"
-            >Terms & Conditions</span
-          >
-        </div>
-        <button
-          type="submit"
-          class="btn btn-primary me-1 d-none-print"
-        >
-          Save
-        </button>
-        <button
-          id="print-btn"
-          type="button"
-          class="btn btn-primary d-none-print"
-        >
-          Print
-        </button>
-      </div>
-    </form>
-  </div>
+    <!-- JavaScript for Dynamic Functionality -->
+    <script>
+      const changeMessage = document.getElementById("change");
+      let hasChanges = false; // Flag to track changes
 
-  <template id="item">
-    <tr>
-      <td class="id"></td>
-      <td class="name"></td>
-      <td class="quantity">
-        <input
-          class="form-control text-center"
-          type="number"
-          min="1"
-        />
-      </td>
-      <td class="price">
-        <div>
-          <input
-            class="form-control text-center"
-            type="number"
-            step="0.01"
-            min="0.01"
-          />
-        </div>
-      </td>
-      <td class="total"></td>
-    </tr>
-  </template>
+      // Function to update subtotal and total
+      function updateTotals() {
+        const rows = document.querySelectorAll("#rfqTable tbody tr");
+        let grandTotal = 0;
 
-  <div
-    class="modal fade d-none-print"
-    id="tnc"
-    tabindex="-1"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1
-            class="modal-title fs-5"
-            id="tncModalLabel"
-          >
-            Terms & Condition
-          </h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div
-          class="modal-body overflow-y-auto"
-          style="height: 70vh"
-        >
-          <ol>
-            <li>
-              Suppliers may amend or withdraw their quotations prior to the
-              submission deadline, provided <b>written notification</b> is
-              submitted to the buyer in advance.
-            </li>
-            <li>
-              Prices must be quoted as either inclusive or exclusive of taxes,
-              duties, and other applicable charges, as specified in the Request
-              for Quotation ("RFQ").
-            </li>
-            <li>
-              Any additional costs must be itemised and supported with a
-              detailed justification.
-            </li>
-            <li>
-              Suppliers are
-              <b>required to indicate applicable payment terms</b>, such as
-              payment within 30 days following delivery and acceptance or any
-              advance payment arrangements.
-            </li>
-            <li>
-              Any <b>warranties or guarantees</b> associated with the quoted
-              products or services must be clearly stated.
-            </li>
-            <li>
-              The buyer, Vendosync, <b>reserves the right</b> to reject any or
-              all quotations at its sole discretion without providing a
-              justification.
-            </li>
-            <li>
-              All information exchanged during the RFQ and quotation process
-              must remain strictly <b>confidential</b> and shall not be
-              disclosed to third parties without prior written consent from the
-              buyer.
-            </li>
-            <li>
-              Any disputes arising from this RFQ process shall be resolved in
-              accordance with the applicable laws and jurisdiction specified in
-              the RFQ.
-            </li>
-            <li>
-              Quotations must be signed by a duly authorised representative of
-              the supplier to be considered valid.
-            </li>
-            <li>
-              Quotations must strictly adhere to the technical and functional
-              specifications outlined in the RFQ. Any deviations must be
-              explicitly identified and justified.
-            </li>
-            <li>
-              Submitted quotations, along with any accompanying documentation,
-              shall become the property of Vendosync and will not be returned to
-              the supplier.
-            </li>
-          </ol>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
+        rows.forEach((row) => {
+          const quantityInput = row.querySelector(".quantity input");
+          const priceInput = row.querySelector(".price input");
+          const totalCell = row.querySelector(".total");
+
+          const quantity = parseFloat(quantityInput.value) || 0;
+          const price = parseFloat(priceInput.value) || 0;
+          const subtotal = quantity * price;
+
+          totalCell.textContent = subtotal.toFixed(2);
+          grandTotal += subtotal;
+        });
+
+        // Update the grand total
+        document.getElementById("total").textContent = grandTotal.toFixed(2);
+      }
+
+      // Add event listeners to quantity and price inputs
+      document.addEventListener("DOMContentLoaded", () => {
+        const tbody = document.querySelector("#rfqTable tbody");
+
+        tbody.addEventListener("input", (event) => {
+          if (
+            event.target.matches(".quantity input") ||
+            event.target.matches(".price input")
+          ) {
+            // Set the flag to indicate changes have been made
+            hasChanges = true;
+            changeMessage.textContent = "Unsaved changes";
+            updateTotals();
+          }
+        });
+
+        // Print button functionality
+        const printBtn = document.getElementById("print-btn");
+        printBtn.addEventListener("click", () => {
+          window.print();
+        });
+
+        // Initial calculation
+        updateTotals();
+      });
+
+      // Submit response function
+      function submitResponse(token) {
+        const items = [];
+        document.querySelectorAll("#rfqTable tbody tr").forEach((row) => {
+          const itemId = row.querySelector(".id").textContent;
+          const quantity = row.querySelector(".quantity input").value;
+          const unitPrice = row.querySelector(".price input").value;
+          items.push({
+            item_id: itemId,
+            quantity: quantity,
+            unit_price: unitPrice,
+          });
+        });
+
+        fetch("/submit_rfq_response", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token: token, items: items }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              // Handle HTTP errors (e.g., 400, 404, 500)
+              return response.json().then((errorData) => {
+                throw new Error(
+                  errorData.message ||
+                    "An error occurred while submitting the response."
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.code === "success") {
+              // Update the flag and message immediately
+              hasChanges = false;
+              changeMessage.textContent = "All changes are saved";
+
+              // Display success message
+              alert(data.message || "Response submitted successfully!");
+            } else {
+              // Display error message from backend
+              alert(`Error: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            // Display error message to the user
+            alert(
+              error.message ||
+                "An unexpected error occurred while submitting the response."
+            );
+          });
+      }
+
+      // Submit order function
+      function submitOrder(token) {
+        fetch("/submit_order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token: token }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((errorData) => {
+                throw new Error(
+                  errorData.message ||
+                    "An error occurred while submitting the order."
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.code === "success") {
+              alert(data.message || "Order submitted successfully!");
+            } else {
+              alert(`Error: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert(
+              error.message ||
+                "An unexpected error occurred while submitting the order."
+            );
+          });
+      }
+
+      function submitOrder(token) {
+        fetch("/submit_order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token: token }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((errorData) => {
+                throw new Error(
+                  errorData.message ||
+                    "An error occurred while submitting the order."
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.code === "success") {
+              alert(data.message || "Order submitted successfully!");
+              // Optionally, refresh the page or update the UI
+              window.location.reload();
+            } else {
+              alert(`Error: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert(
+              error.message ||
+                "An unexpected error occurred while submitting the order."
+            );
+          });
+      }
+    </script>
+
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.umd.min.js"
+    ></script>
+
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.umd.min.js"
+    ></script>
+  </body>
+</html>

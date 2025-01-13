@@ -5,6 +5,7 @@
     class="col-sm-12 col-md-9 col-lg-8 flex-md-grow-0 flex-sm-grow-1 d-flex flex-column"
   >
     <div
+      id="printArea"
       class="card p-4 rounded-9 flex-sm-grow-1 d-flex flex-column overflow-hidden"
       style="max-height: 80vh"
     >
@@ -134,6 +135,46 @@
               vendor for the item, and click “RFQ” to send a Request for
               Quotation to the selected vendors.
             </p>
+          </li>
+          <li>
+            <p>RFQ (Request for Quotation) Management</p>
+            <p>
+              After initiating the procurement process, the system will send an
+              email to the selected vendor(s) with a link to access the RFQ form.
+              Vendors can fill in their accepted quotation details, and users can
+              review, accept, and print the order.
+            </p>
+            <ul>
+              <li>
+                <strong>Sending RFQ to Vendors:</strong> Navigate to the
+                <strong>Procurement</strong> page, select the procurement order,
+                and click <strong>RFQ</strong> to send a Request for Quotation to
+                the selected vendor(s).
+              </li>
+              <li>
+                <strong>Vendor Fills in Quotation:</strong> Vendors can click the
+                link in the email to access the RFQ form and fill in details such
+                as quantity, price, delivery time, and additional notes.
+              </li>
+              <li>
+                <strong>User Reviews and Accepts Quotation:</strong> After the
+                vendor submits the RFQ form, the user can review the quotation
+                details on the <strong>Procurement</strong> page and click
+                <strong>Accept</strong> to confirm the order or
+                <strong>Reject</strong> to request a revised quotation.
+              </li>
+              <li>
+                <strong>Printing the Order:</strong> Once the quotation is
+                accepted, the system will generate an order confirmation. Click
+                <strong>Print</strong> to generate a printable version of the
+                order confirmation.
+              </li>
+              <li>
+                <strong>Vendor Notification:</strong> After the user accepts the
+                quotation, the vendor will receive a confirmation email with the
+                finalized order details.
+              </li>
+            </ul>
           </li>
           <li>
             <p>Reports</p>
@@ -530,125 +571,27 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="d-flex fixed-bottom justify-content-between mb-5 me-5"
+      style="padding: 16px; margin-right: 48px; margin-bottom: 0px"
+    >
+      <button
+        id="return"
+        type="button"
+        class="btn btn-primary rounded-circle p-3 d-flex justify-content-center align-items-center"
+        style="width: 40px; height: 40px"
+      >
+        <i class="bi bi-escape"></i>
+      </button>
+      <button
+        id="printBtn"
+        type="button"
+        class="btn btn-primary rounded-circle p-3 d-flex justify-content-center align-items-center"
+        style="width: 40px; height: 40px"
+      >
+        <i class="bi bi-printer"></i>
+      </button>
+    </div>
   </div>
 </main>
-
-<!-- Print Button -->
-<button
-  onclick="printPage()"
-  style="
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1000; /* Ensure the button is above other content */
-  "
->
-  Print as PDF
-</button>
-
-<script>
-  function printPage() {
-    // Expand all <details> elements
-    const detailsElements = document.querySelectorAll("details");
-    detailsElements.forEach((details) => {
-      details.open = true; // Open all dropdowns
-    });
-
-    // Trigger the print dialog
-    window.print();
-  }
-</script>
-
-<!-- CSS for Print Styling -->
-<style>
-  @media print {
-    /* Hide the print button when printing */
-    button {
-      display: none;
-    }
-
-    /* Ensure the card and content fit the page */
-    .card {
-      max-height: none !important;
-      overflow: visible !important;
-    }
-
-    /* Adjust margins and padding for printing */
-    body {
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Ensure dropdowns are expanded and visible */
-    details {
-      display: block !important;
-    }
-
-    summary {
-      display: none; /* Hide the summary (dropdown toggle) when printing */
-    }
-
-    /* Add page breaks */
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      page-break-after: avoid; /* Avoid breaking after headings */
-    }
-
-    ol,
-    ul,
-    dl,
-    p {
-      page-break-inside: avoid; /* Avoid breaking inside lists and paragraphs */
-    }
-
-    .faq-dropdown details {
-      page-break-inside: avoid; /* Avoid breaking inside FAQ sections */
-    }
-
-    /* Force page breaks after major sections */
-    h1 {
-      page-break-before: always; /* Start a new page before each h1 */
-    }
-
-    h1:first-of-type {
-      page-break-before: avoid; /* Avoid breaking before the first h1 */
-    }
-  }
-
-  /* Styling for the FAQ dropdowns */
-  .faq-dropdown details {
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-  }
-
-  .faq-dropdown summary {
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .faq-dropdown dl {
-    margin-top: 10px;
-  }
-
-  .faq-dropdown dt {
-    font-weight: bold;
-    margin-top: 10px;
-  }
-
-  .faq-dropdown dd {
-    margin-left: 20px;
-    margin-bottom: 15px;
-  }
-</style>

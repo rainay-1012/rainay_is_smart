@@ -1,10 +1,9 @@
-from database import RFQ, Category, Position, Procurement, ProcurementItem, Vendor, db
+from database import Category, Position, Procurement, ProcurementItem, Vendor, db
 from flask import Blueprint, g, jsonify
 from flask import current_app as app
 from sqlalchemy.orm import joinedload
 from utils import (
     check_token,
-    emit_data_change,
     require_fields,
 )
 
@@ -78,38 +77,3 @@ def get_suggestion_vendors(category_id):
 
     app.logger.debug(f"{g.user['email']} | Returning suggested vendor data")
     return jsonify({"data": data})
-
-
-@procurement_routes.route("/add_rfq", methods=["POST"])
-@check_token(Position.executive)
-@require_fields(["id", "items", "vendors"])
-def add_rfq(data):
-    app.logger.debug(f"{g.user['email']} | add rfq with data {data}")
-
-    procurement_items = ProcurementItem.query.filter(
-        ProcurementItem.procurement_id == data["id"],
-        ProcurementItem.item_id.in_(data["items"]),
-    ).all()
-
-    app.logger.debug(procurement_items)
-
-    rfqs = [
-        RFQ(
-            procurement_id=data["id"],
-            vendor_id=vendor_id,
-            procurement_items=procurement_items,
-        )
-        for vendor_id in data["vendors"]
-    ]
-
-    db.session.add_all(rfqs)
-    db.session.commit()
-
-    app.logger.debug(f"{g.user['email']} | added rfq")
-
-    for rfq in rfqs:
-        emit_data_change("cast", "add", rfq)
-
-    return jsonify(
-        {"code": "crud/add", "message": "RFQs has been added successfully."}
-    ), 201
